@@ -1,12 +1,12 @@
 from attr import attrs
 
 from handling import HandlingResult
-from listening import Listener
+from listening.listener_with_req_id_required import ListenerWithRequestIdRequired
 from publishing.publisher import Publisher
 
 
 @attrs(auto_attribs=True)
-class ListenerWithPublishing(Listener):
+class ListenerWithPublishing(ListenerWithRequestIdRequired):
     publisher: Publisher
 
     def on_published(self, result: HandlingResult):

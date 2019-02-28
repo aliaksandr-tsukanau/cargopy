@@ -1,19 +1,21 @@
-from abc import ABC
-from typing import Mapping, Any
+from abc import ABC, abstractmethod
+from typing import Mapping, Any, Callable
 
 from attr import attrs
 
 from handling import Handler, HandlingResult
 from listening import Message
 from parsing.parser import Parser
-from subscribing import Subscriber
+
+
+Callback = Callable[[Message], Any]
 
 
 @attrs(auto_attribs=True, frozen=True)
 class Listener(ABC):
     handler: Handler
     parser: Parser
-    subscriber: Subscriber
+    subscribe_fn: Callable[[Callback], Any]
 
     def on_received(self, message: Message):
         pass
@@ -24,6 +26,7 @@ class Listener(ABC):
     def on_parsed(self, original: Message, parsed: Mapping[str, Any]):
         pass
 
+    @abstractmethod
     def on_parsing_failed(self, message: Message, error: Exception):
         raise error
 
@@ -43,4 +46,4 @@ class Listener(ABC):
         self.on_handled(result)
 
     def start_listening(self):
-        return self.subscriber.subscribe(callback=self._actual_callback)
+        return self.subscribe_fn(callback=self._actual_callback)

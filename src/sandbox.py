@@ -7,7 +7,6 @@ from handling import Handler
 from handling.types import ParsedMessage, ZeroToManyParsedMessages
 from listening import Listener, Message
 from parsing import Parser
-from subscribing import Subscriber
 
 
 class DummyHandler(Handler):
@@ -23,14 +22,12 @@ class DummyHandler(Handler):
 class DummyParser(Parser):
 
     def parse(self, message: Message) -> Mapping[str, Any]:
-        return message.attributes['request_id']
+        return {'request_id': message.attributes['request_id']}
 
 
-class DummySubscriber(Subscriber):
-
-    def subscribe(self, callback: Callable[[Message], Any]):
-        s = pubsub_v1.SubscriberClient()
-        return s.subscribe('projects/machinaseptember2016/subscriptions/happyly_testing_01', callback=callback)
+def subscriber(callback: Callable[[Message], Any]):
+    s = pubsub_v1.SubscriberClient()
+    return s.subscribe('projects/machinaseptember2016/subscriptions/happyly_testing_01', callback=callback)
 
 
 if __name__ == '__main__':
@@ -40,7 +37,7 @@ if __name__ == '__main__':
     li = Listener(
         handler=DummyHandler(),
         parser=DummyParser(),
-        subscriber=DummySubscriber()
+        subscribe_fn=subscriber,
     )
     future = li.start_listening()
     try:
