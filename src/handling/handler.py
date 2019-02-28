@@ -1,26 +1,22 @@
 from abc import ABC, abstractmethod
-from typing import Mapping, Any, Union, List
 
-from .handler_result import HandlingResult
+from handling.types import ParsedMessage, ZeroToManyParsedMessages
+from .handling_result import HandlingResult
 
-AbstractMessage = Mapping[str, Any]
-ZeroToManyMessages = Union[AbstractMessage, List[AbstractMessage], None]
-
-
-_no_base_impl = NotImplementedError(f'No default implementation in base Handler class')
+_no_base_impl = NotImplementedError('No default implementation in base Handler class')
 
 
 class Handler(ABC):
 
     @abstractmethod
-    def handle(self, message: AbstractMessage) -> ZeroToManyMessages:
+    def handle(self, message: ParsedMessage) -> ZeroToManyParsedMessages:
         raise _no_base_impl
 
     @abstractmethod
-    def on_handling_failed(self, message: AbstractMessage, error: Exception) -> ZeroToManyMessages:
+    def on_handling_failed(self, message: ParsedMessage, error: Exception) -> ZeroToManyParsedMessages:
         raise _no_base_impl
 
-    def __call__(self, message: AbstractMessage) -> HandlingResult:
+    def __call__(self, message: ParsedMessage) -> HandlingResult:
         try:
             result_data = self.handle(message)
             return HandlingResult.ok(result_data)
