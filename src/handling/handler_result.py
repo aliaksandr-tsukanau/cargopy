@@ -2,7 +2,7 @@ from enum import Enum
 
 from attr import attrs
 
-from src.handling.base import ZeroToManyMessages
+from handling.base import ZeroToManyMessages
 
 
 class HandlingResultStatus(Enum):

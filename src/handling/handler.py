@@ -7,15 +7,18 @@ AbstractMessage = Mapping[str, Any]
 ZeroToManyMessages = Union[AbstractMessage, List[AbstractMessage], None]
 
 
+_no_base_impl = NotImplementedError(f'No default implementation in base Handler class')
+
+
 class Handler(ABC):
 
     @abstractmethod
     def handle(self, message: AbstractMessage) -> ZeroToManyMessages:
-        raise NotImplementedError
+        raise _no_base_impl
 
     @abstractmethod
     def on_handling_failed(self, message: AbstractMessage, error: Exception) -> ZeroToManyMessages:
-        raise NotImplementedError
+        raise _no_base_impl
 
     def __call__(self, message: AbstractMessage) -> HandlingResult:
         try:
