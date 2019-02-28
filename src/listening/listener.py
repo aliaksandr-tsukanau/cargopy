@@ -43,4 +43,4 @@ class Listener(ABC):
         self.on_handled(result)
 
     def start_listening(self):
-        self.subscriber.subscribe(callback=self._actual_callback)
+        return self.subscriber.subscribe(callback=self._actual_callback)
