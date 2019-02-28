@@ -2,7 +2,7 @@ from enum import Enum
 
 from attr import attrs
 
-from handling.base import ZeroToManyMessages
+from handling.types import ZeroToManyParsedMessages
 
 
 class HandlingResultStatus(Enum):
@@ -13,7 +13,7 @@ class HandlingResultStatus(Enum):
 @attrs(auto_attribs=True, frozen=True)
 class HandlingResult:
     status: HandlingResultStatus
-    data: ZeroToManyMessages
+    data: ZeroToManyParsedMessages
 
     @classmethod
     def ok(cls, data):

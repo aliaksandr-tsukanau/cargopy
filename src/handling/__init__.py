@@ -1,2 +1,2 @@
 from .handler import Handler
-from .handler_result import HandlingResult, HandlingResultStatus
+from .handling_result import HandlingResult, HandlingResultStatus
