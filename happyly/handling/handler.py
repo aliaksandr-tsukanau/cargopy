@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Mapping, Any
 
-from handling.types import ParsedMessage, ZeroToManyParsedMessages
+from .types import ZeroToManyParsedMessages
 from .handling_result import HandlingResult
 
 _no_base_impl = NotImplementedError('No default implementation in base Handler class')
@@ -12,7 +13,7 @@ class Handler(ABC):
     """
 
     @abstractmethod
-    def handle(self, message: ParsedMessage) -> ZeroToManyParsedMessages:
+    def handle(self, message: Mapping[str, Any]) -> ZeroToManyParsedMessages:
         """
         Applies logic using a provided message, optionally gives back one or more results.
         Each result consists of message attributes which can be serialized and sent.
@@ -26,7 +27,7 @@ class Handler(ABC):
         raise _no_base_impl
 
     @abstractmethod
-    def on_handling_failed(self, message: ParsedMessage, error: Exception) -> ZeroToManyParsedMessages:
+    def on_handling_failed(self, message: Mapping[str, Any], error: Exception) -> ZeroToManyParsedMessages:
         """
         Applies fallback logic using a provided message when `handle` fails,
         optionally gives back one or more results.
@@ -40,7 +41,7 @@ class Handler(ABC):
         """
         raise _no_base_impl
 
-    def __call__(self, message: ParsedMessage) -> HandlingResult:
+    def __call__(self, message: Mapping[str, Any]) -> HandlingResult:
         try:
             result_data = self.handle(message)
             return HandlingResult.ok(result_data)
