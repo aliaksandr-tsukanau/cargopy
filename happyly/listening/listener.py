@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from attr import attrs, attrib
