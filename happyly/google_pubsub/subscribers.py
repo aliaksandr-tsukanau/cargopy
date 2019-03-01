@@ -1,9 +1,13 @@
+import logging
 from typing import Callable, Any
 
 from attr import attrs, attrib
 from google.cloud import pubsub_v1
 
 import happyly.pubsub
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @attrs(auto_attribs=True)
@@ -19,6 +23,7 @@ class GooglePubSubSubscriber(happyly.pubsub.Subscriber):
         self._subscription_client = s
 
     def subscribe(self, callback: Callable[[Any], Any]):
+        _LOGGER.info(f'Starting to listen to {self.subscription_name}')
         return self._subscription_client.subscribe(self._subscription_path, callback)
 
     def ack(self, message):

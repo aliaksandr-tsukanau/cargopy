@@ -1,3 +1,4 @@
+import logging
 from typing import Mapping, Any, Optional
 
 from attr import attrs
@@ -7,6 +8,9 @@ from happyly.serialization.deserializer import Deserializer
 from happyly.pubsub import Publisher
 
 
+_LOGGER = logging.getLogger(__name__)
+
+
 @attrs(auto_attribs=True, frozen=True)
 class Executor:
     handler: Handler
@@ -14,25 +18,22 @@ class Executor:
     publisher: Optional[Publisher] = None
 
     def on_received(self, message: Any):
-        pass
-
-    def on_acknowledged(self, message: Any):
-        pass
+        _LOGGER.info(f'Received message:\n {message}')
 
     def on_parsed(self, original_message: Any, parsed_message: Mapping[str, Any]):
-        pass
+        _LOGGER.debug(f'Message successfully deserialized into attributes:\n {parsed_message}')
 
     def on_parsing_failed(self, message: Any, error: Exception):
-        pass
+        _LOGGER.exception(f"Was not able to deserialize the following message\n{message}")
 
     def on_handled(self, result: HandlingResult):
-        pass
+        _LOGGER.info(f'Message handled, status {result.status}')
 
     def on_published(self, result: HandlingResult):
-        pass
+        _LOGGER.info(f'Published result:\n{result}')
 
     def on_publishing_failed(self, result: HandlingResult, error: Exception):
-        pass
+        _LOGGER.exception('Failed to publish result:\n{result}')
 
     def _when_parsing_succeeded(self, parsed: Mapping[str, Any]):
         result = self.handler(parsed)

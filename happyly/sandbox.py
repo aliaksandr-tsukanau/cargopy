@@ -1,47 +1,56 @@
-import json
+import logging
 import os
-from typing import Mapping, Any
+from collections import namedtuple
 
-from google_pubsub.subscribers import GooglePubSubSubscriber
+import marshmallow
+from marshmallow import fields
+
+from happyly.google_pubsub.deserializers import JSONDeserializerWithRequestIdRequired
+from happyly.google_pubsub.publishers import GooglePubSubPublisher
+from happyly.google_pubsub.serializers import BinaryJSONSerializer
 from happyly.handling import Handler
-from happyly.listening import Listener
-from happyly.handling.types import ParsedMessage
-from happyly.serialization import Deserializer
+from happyly.listening.executor import Executor
 
 
-class MyDeserializer(Deserializer):
+class InputSchema(marshmallow.Schema):
+    request_id = fields.Str(required=True)
 
-    def deserialize(self, message):
-        return json.loads(message)
 
-    def build_error_result(self, message, error) -> Mapping[str, Any]:
-        return {'error': repr(error)}
+class OutputSchema(marshmallow.Schema):
+    request_id = fields.Str(required=True)
+    code = fields.Int(required=True)
 
 
 class MyHandler(Handler):
 
-    def handle(self, message: ParsedMessage):
-        print(f'Received message with {len(message)} attributes')
-        print(f'request id is {message["request_id"]}')
+    def handle(self, message):
+        print('Super heavy processing here......')
+        return {
+            'request_id': message['request_id'],
+            'code': 123,
+        }
 
-    def on_handling_failed(self, _: ParsedMessage, error: Exception):
+    def on_handling_failed(self, message, error: Exception):
         print(repr(error))
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+
     SERVICE_ACCOUNT_FILE = '/cfg/machinaseptember2016-60ec1dc9f2ae.json'
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = SERVICE_ACCOUNT_FILE
 
-    listener = Listener(
+    deserializer = JSONDeserializerWithRequestIdRequired(InputSchema(strict=True))
+    serializer = BinaryJSONSerializer(OutputSchema(strict=True))
+
+    listener = Executor(
         handler=MyHandler(),
-        deserializer=MyDeserializer(),
-        subscriber=GooglePubSubSubscriber(
+        deserializer=deserializer,
+        publisher=GooglePubSubPublisher(
+            serializer=serializer,
+            publish_all_to='happyly_testing',
             project='machinaseptember2016',
-            subscription_name='happyly_testing_01'
         )
     )
-    future = listener.start_listening()
-    try:
-        future.result()
-    except KeyboardInterrupt:
-        future.cancel()
+    msg = namedtuple('MessageMock', 'data')(b'{"request_id": "123"}')
+    listener.run(msg)

@@ -8,7 +8,7 @@ from happyly.serialization import Deserializer
 
 
 @attrs(auto_attribs=True, frozen=True)
-class JsonDeserializerWithRequestIdRequired(Deserializer):
+class JSONDeserializerWithRequestIdRequired(Deserializer):
     schema: marshmallow.Schema
     _request_id_field: str = 'request_id'
     _status_field: str = 'status'
@@ -16,7 +16,9 @@ class JsonDeserializerWithRequestIdRequired(Deserializer):
     _status_error: str = 'ERROR'
 
     def deserialize(self, message: Any) -> Mapping[str, Any]:
-        return self.schema.load(message.data)
+        data = message.data.decode('utf-8')
+        deserialized, _ = self.schema.loads(data)
+        return deserialized
 
     def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
         attributes = json.load(message.data)

@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from attr import attrs, attrib
@@ -14,6 +15,7 @@ class Listener(Executor):
         pass
 
     def on_received(self, message: Any):
+        super().on_received(message)
         self.subscriber.ack(message)
         self.on_acknowledged(message)
 
