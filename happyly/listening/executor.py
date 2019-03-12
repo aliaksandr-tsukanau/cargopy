@@ -51,7 +51,7 @@ class Executor(Generic[D, P]):
             result=result,
         )
         if self.publisher is not None:
-            self._try_publish(result)
+            self._try_publish(original, parsed, result)
 
     def _when_parsing_failed(self, message: Any, error: Exception):
         if self.publisher is None:
