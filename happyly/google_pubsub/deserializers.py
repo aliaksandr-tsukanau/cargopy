@@ -10,9 +10,9 @@ from happyly.serialization import Deserializer
 @attrs(auto_attribs=True, frozen=True)
 class JSONDeserializerWithRequestIdRequired(Deserializer):
     schema: marshmallow.Schema
-    _request_id_field: str = 'request_id'
-    _status_field: str = 'status'
-    _error_field: str = 'error'
+    request_id_field: str = 'request_id'
+    status_field: str = 'status'
+    error_field: str = 'error'
     _status_error: str = 'ERROR'
 
     def deserialize(self, message: Any) -> Mapping[str, Any]:
@@ -24,9 +24,9 @@ class JSONDeserializerWithRequestIdRequired(Deserializer):
         attributes = json.load(message.data)
         try:
             return {
-                self._request_id_field: attributes[self._request_id_field],
-                self._status_field: self._status_error,
-                self._error_field: repr(error),
+                self.request_id_field: attributes[self.request_id_field],
+                self.status_field: self._status_error,
+                self.error_field: repr(error),
             }
         except AttributeError:
-            raise ValueError(f'message {message} contains no {self._request_id_field}')
+            raise ValueError(f'message {message} contains no {self.request_id_field}')

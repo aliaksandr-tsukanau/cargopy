@@ -75,20 +75,3 @@ class GoogleReceiveAndReplyComponent(Listener):
             )
         )
         super().__init__(handler=handler, deserializer=deserializer, subscriber=subscriber, publisher=publisher)
-
-
-_awaiting_for_ids = set()
-
-
-class GoogleOneTimeReceiverForRequestId(GoogleSimpleReceiver):
-    # TODO: fix race condition
-
-    def __init__(self, request_id: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._request_id = request_id
-        _awaiting_for_ids.add(request_id)
-
-    def _when_parsing_succeeded(self, parsed: Mapping[str, Any]):
-        if parsed[self.deserializer._request_id_field] in _awaiting_for_ids:
-            super()._when_parsing_succeeded(parsed)
-            _awaiting_for_ids.remove(self._request_id)
