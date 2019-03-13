@@ -1,0 +1,7 @@
+[build-system]
+# default value: for now we still use setuptools
+requires = ["setuptools", "wheel"]
+
+[tool:black]
+line-length = 88
+py36 = true
