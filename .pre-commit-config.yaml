@@ -3,6 +3,8 @@ repos:
     rev: stable
     hooks:
     - id: black
+      # don't convert all strings to double-quotes
+      args: [--skip-string-normalization]
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.0.0
     hooks:
