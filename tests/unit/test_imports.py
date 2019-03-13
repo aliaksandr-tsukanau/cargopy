@@ -14,9 +14,13 @@ def test_imports():
     from happyly.serialization import Deserializer, Serializer
 
     from happyly.google_pubsub import (
-        GoogleSimpleReceiver, GoogleSimpleSender, GoogleReceiveAndReplyComponent
+        GoogleSimpleReceiver,
+        GoogleSimpleSender,
+        GoogleReceiveAndReplyComponent,
     )
-    from happyly.google_pubsub.deserializers import JSONDeserializerWithRequestIdRequired
+    from happyly.google_pubsub.deserializers import (
+        JSONDeserializerWithRequestIdRequired,
+    )
     from happyly.google_pubsub.serializers import BinaryJSONSerializer
     from happyly.google_pubsub.publishers import GooglePubSubPublisher
     from happyly.google_pubsub.subscribers import GooglePubSubSubscriber

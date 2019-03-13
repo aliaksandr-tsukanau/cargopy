@@ -17,14 +17,8 @@ class HandlingResult:
 
     @classmethod
     def ok(cls, data):
-        return HandlingResult(
-            status=HandlingResultStatus.OK,
-            data=data,
-        )
+        return HandlingResult(status=HandlingResultStatus.OK, data=data)
 
     @classmethod
     def err(cls, data):
-        return HandlingResult(
-            status=HandlingResultStatus.ERR,
-            data=data,
-        )
+        return HandlingResult(status=HandlingResultStatus.ERR, data=data)

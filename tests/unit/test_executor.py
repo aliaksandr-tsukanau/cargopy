@@ -12,15 +12,15 @@ from tests.unit.test_handler import TestHandler
 @patch('test_executor.Executor.on_publishing_failed')
 @patch('test_executor.TestHandler.__call__', return_value=42)
 def test_executor_no_input(
-        handler, on_publishing_failed, on_published, on_handled,
-        on_deserialization_failed, on_deserialized, on_received,
-
+    handler,
+    on_publishing_failed,
+    on_published,
+    on_handled,
+    on_deserialization_failed,
+    on_deserialized,
+    on_received,
 ):
-    executor = Executor(
-        handler=TestHandler(),
-        deserializer=None,
-        publisher=None,
-    )
+    executor = Executor(handler=TestHandler(), deserializer=None, publisher=None)
     assert executor.deserializer is None
     assert executor.publisher is None
     executor.run()

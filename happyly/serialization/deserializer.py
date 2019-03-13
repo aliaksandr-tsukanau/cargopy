@@ -6,7 +6,6 @@ _not_impl = NotImplementedError('No default implementation in base Deserializer 
 
 
 class Deserializer(ABC):
-
     @abstractmethod
     def deserialize(self, message: Any) -> Mapping[str, Any]:
         raise _not_impl

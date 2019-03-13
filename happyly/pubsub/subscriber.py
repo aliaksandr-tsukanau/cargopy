@@ -3,7 +3,6 @@ from typing import Callable, Any
 
 
 class Subscriber(ABC):
-
     @abstractmethod
     def subscribe(self, callback: Callable[[Any], Any]):
         raise NotImplementedError

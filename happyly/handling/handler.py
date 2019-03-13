@@ -27,7 +27,9 @@ class Handler(ABC):
         raise _no_base_impl
 
     @abstractmethod
-    def on_handling_failed(self, message: Mapping[str, Any], error: Exception) -> ZeroToManyParsedMessages:
+    def on_handling_failed(
+        self, message: Mapping[str, Any], error: Exception
+    ) -> ZeroToManyParsedMessages:
         """
         Applies fallback logic using a provided message when `handle` fails,
         optionally gives back one or more results.

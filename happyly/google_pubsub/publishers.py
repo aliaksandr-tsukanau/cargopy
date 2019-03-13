@@ -16,8 +16,7 @@ class GooglePubSubPublisher(Publisher):
 
     def publish_message(self, serialized_message: Any, to: str):
         future = self._publisher_client.publish(
-            f'projects/{self.project}/topics/{to}',
-            serialized_message,
+            f'projects/{self.project}/topics/{to}', serialized_message
         )
         try:
             future.result()

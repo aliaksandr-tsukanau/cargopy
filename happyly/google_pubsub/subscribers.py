@@ -19,7 +19,9 @@ class GooglePubSubSubscriber(happyly.pubsub.Subscriber):
 
     def __attrs_post_init__(self):
         s = pubsub_v1.SubscriberClient()
-        self._subscription_path = s.subscription_path(self.project, self.subscription_name)
+        self._subscription_path = s.subscription_path(
+            self.project, self.subscription_name
+        )
         self._subscription_client = s
 
     def subscribe(self, callback: Callable[[Any], Any]):
