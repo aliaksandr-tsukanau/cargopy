@@ -6,7 +6,6 @@ from happyly.pubsub import Publisher
 
 
 class GooglePubSubPublisher(Publisher):
-
     def __init__(self, project, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project = project

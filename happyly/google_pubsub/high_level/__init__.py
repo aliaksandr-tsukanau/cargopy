@@ -1,1 +1,5 @@
-from .high_level import GoogleSimpleSender, GoogleSimpleReceiver, GoogleReceiveAndReplyComponent
+from .high_level import (  # noqa: F401
+    GoogleSimpleSender,
+    GoogleSimpleReceiver,
+    GoogleReceiveAndReplyComponent,
+)
