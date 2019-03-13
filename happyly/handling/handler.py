@@ -15,7 +15,8 @@ class Handler(ABC):
     @abstractmethod
     def handle(self, message: Mapping[str, Any]) -> ZeroToManyParsedMessages:
         """
-        Applies logic using a provided message, optionally gives back one or more results.
+        Applies logic using a provided message,
+        optionally gives back one or more results.
         Each result consists of message attributes which can be serialized and sent.
         When fails, calls `on_handling_failed`
 
