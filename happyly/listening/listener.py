@@ -1,13 +1,19 @@
-from typing import Any
+from typing import Any, TypeVar
 
 from attr import attrs, attrib
 
+from happyly.pubsub import Publisher
 from happyly.pubsub.subscriber import Subscriber
+from happyly.serialization import Deserializer
 from .executor import Executor
 
 
+D = TypeVar("D", bound=Deserializer)
+P = TypeVar("P", bound=Publisher)
+
+
 @attrs(auto_attribs=True, frozen=True)
-class Listener(Executor):
+class Listener(Executor[D, P]):
     subscriber: Subscriber = attrib(kw_only=True)
 
     def on_acknowledged(self, message: Any):
