@@ -15,8 +15,14 @@ Happyly stands for <b>HA</b>ndlers for <b>P</b>ub/sub as a <b>PY</b>thon <b>L</b
 Check out [tutorial](https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb)
 
 # Development
-1. Create and activate a virtual environment (e.g. `python -m venv env; source env/bin/activate`)
-2. Install [`flit`](https://flit.readthedocs.io/en/latest/): `pip install flit`
-3. Use `flit` to install the package with all development dependencies: `flit install`
-4. Note that the repository uses [pre-commit](https://pre-commit.com/) to auto-check code for style and types. Enable it for your cloned repo with `pre-commit install`.
-5. When you are ready to deploy project, use [`bumpversion`](https://github.com/c4urself/bump2version): `bumpversion patch` (or `minor`, or `major`) and then `git push && git push --tags`.
+1. Create and activate a virtual environment (e.g. `python -m venv env; source env/bin/activate`).
+2. Install [`flit`](https://flit.readthedocs.io/en/latest/): `pip install flit`.
+3. Use `flit` to install the package with all development dependencies: `flit install`.
+4. Note that the repository uses [pre-commit](https://pre-commit.com/)
+   to auto-check code for style and types.
+   Enable it for your cloned repo with `pre-commit install`.
+5. In order to run tests, use either `py.test` (tests on your current python version)
+   or `tox` (will try to test against all supported python versions).
+6. When you are ready to deploy project,
+   use [`bumpversion`](https://github.com/c4urself/bump2version):
+   `bumpversion patch` (or `minor`, or `major`) and then `git push && git push --tags`.
