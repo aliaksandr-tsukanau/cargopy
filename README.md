@@ -15,5 +15,7 @@ Happyly stands for <b>HA</b>ndlers for <b>P</b>ub/sub as a <b>PY</b>thon <b>L</b
 Check out [tutorial](https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb)
 
 # Development
-Create a virtual environment and install dependencies from `requirements.txt` and `requirements-dev.txt`
-Note that the repository uses [pre-commit](https://pre-commit.com/) to auto-check code for style and types.
+1. Create and activate a virtual environment (e.g. `python -m venv env; source env/bin/activate`)
+2. Install [`flit`](https://flit.readthedocs.io/en/latest/): `pip install flit`
+3. Use `flit` to install the package with all development dependencies: `flit install`
+4. Note that the repository uses [pre-commit](https://pre-commit.com/) to auto-check code for style and types. Enable it for your cloned repo with `pre-commit install`.

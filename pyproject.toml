@@ -24,6 +24,14 @@ requires = [
 ]
 requires-python = ">=3.6"
 
+[tool.flit.metadata.requires-extra]
+# these are special extras for flit
+dev = [
+    "bump2version>=0.5.10",  # use bump2version while bumpversion project is inactive
+    "pre-commit>=1.14.4",
+]
+test = ["pytest>=4.3.0"]
+
 [tool.flit.metadata.urls]
 Documentation = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
 

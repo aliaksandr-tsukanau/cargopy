@@ -1,3 +1,0 @@
-attrs>=18.2
-google-cloud-pubsub>=0.37.2
-marshmallow>2.15,<3
