@@ -19,3 +19,4 @@ Check out [tutorial](https://github.com/equeumco/happyly/blob/master/Tutorial.ip
 2. Install [`flit`](https://flit.readthedocs.io/en/latest/): `pip install flit`
 3. Use `flit` to install the package with all development dependencies: `flit install`
 4. Note that the repository uses [pre-commit](https://pre-commit.com/) to auto-check code for style and types. Enable it for your cloned repo with `pre-commit install`.
+5. When you are ready to deploy project, use [`bumpversion`](https://github.com/c4urself/bump2version): `bumpversion patch` (or `minor`, or `major`) and then `git push && git push --tags`.
