@@ -15,5 +15,5 @@ Happyly stands for <b>HA</b>ndlers for <b>P</b>ub/sub as a <b>PY</b>thon <b>L</b
 Check out [tutorial](https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb)
 
 # Development
-Create a virtual environment and install dependencies from `requirements.txt` and `requirements.txt`
+Create a virtual environment and install dependencies from `requirements.txt` and `requirements-dev.txt`
 Note that the repository uses [pre-commit](https://pre-commit.com/) to auto-check code for style and types.
