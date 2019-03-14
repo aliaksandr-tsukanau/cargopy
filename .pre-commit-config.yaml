@@ -9,6 +9,7 @@ repos:
     rev: v2.0.0
     hooks:
     - id: trailing-whitespace
+      exclude: 'setup.cfg'  # bumpversion adds trailing whitespace for some reason. Fix if you know how to
     - id: flake8
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.670
