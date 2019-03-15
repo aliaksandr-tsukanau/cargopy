@@ -21,7 +21,7 @@ Check out [tutorial](https://github.com/equeumco/happyly/blob/master/Tutorial.ip
 4. Note that the repository uses [pre-commit](https://pre-commit.com/)
    to auto-check code for style and types.
    Enable it for your cloned repo with `pre-commit install`.
-5. In order to run tests, use either `py.test` (tests on your current python version)
+5. In order to run tests, use either `pytest` (tests on your current python version)
    or `tox` (will try to test against all supported python versions).
 6. When you are ready to deploy project,
    use [`bumpversion`](https://github.com/c4urself/bump2version):
