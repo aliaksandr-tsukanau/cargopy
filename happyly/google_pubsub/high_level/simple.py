@@ -44,7 +44,7 @@ class GoogleSimpleReceiver(Listener[JSONDeserializerWithRequestIdRequired, None]
         )
 
 
-class GoogleReceiveAndReplyComponent(
+class GoogleSimpleReceiveAndReply(
     Listener[JSONDeserializerWithRequestIdRequired, GooglePubSubPublisher]
 ):
     def __init__(
@@ -72,3 +72,7 @@ class GoogleReceiveAndReplyComponent(
             subscriber=subscriber,
             publisher=publisher,
         )
+
+
+# for compatibility
+GoogleReceiveAndReplyComponent = GoogleSimpleReceiveAndReply
