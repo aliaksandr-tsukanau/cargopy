@@ -18,7 +18,7 @@ class CacheByRequestIdMixin:
             pass
         else:
             data = json.dumps(
-                {'topic': self.from_topic, 'data': json.load(message.data)}
+                {'topic': self.from_topic, 'data': json.loads(message.data)}
             )
             self.cacher.add(data, key=req_id)
 
