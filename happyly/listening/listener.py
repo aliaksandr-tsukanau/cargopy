@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Optional
 
 from attr import attrs, attrib
 
@@ -12,17 +12,17 @@ D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
 
 
-@attrs(auto_attribs=True, frozen=True)
+@attrs(auto_attribs=True)
 class Listener(Executor[D, P]):
     subscriber: Subscriber = attrib(kw_only=True)
 
     def on_acknowledged(self, message: Any):
         pass
 
-    def on_received(self, message: Any):
-        super().on_received(message)
+    def _after_on_received(self, message: Optional[Any]):
         self.subscriber.ack(message)
         self.on_acknowledged(message)
+        super()._after_on_received(message)
 
     def start_listening(self):
         return self.subscriber.subscribe(callback=self.run)

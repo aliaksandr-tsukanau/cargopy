@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from happyly.handling import HandlingResult, HandlingResultStatus
 from happyly.listening import Executor
 from tests.unit.test_handler import TestHandler
 
@@ -10,7 +11,7 @@ from tests.unit.test_handler import TestHandler
 @patch('test_executor.Executor.on_handled')
 @patch('test_executor.Executor.on_published')
 @patch('test_executor.Executor.on_publishing_failed')
-@patch('test_executor.TestHandler.__call__', return_value=42)
+@patch('test_executor.TestHandler.__call__', return_value=HandlingResult.ok(42))
 def test_executor_no_input(
     handler,
     on_publishing_failed,
@@ -25,7 +26,11 @@ def test_executor_no_input(
     assert executor.publisher is None
     executor.run()
     handler.assert_called_with({})
-    on_handled.assert_called_with(original_message=None, parsed_message={}, result=42)
+    on_handled.assert_called_with(
+        original_message=None,
+        parsed_message={},
+        result=HandlingResult(HandlingResultStatus.OK, data=42),
+    )
     on_received.assert_not_called()
     on_published.assert_not_called()
     on_publishing_failed.assert_not_called()
