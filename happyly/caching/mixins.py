@@ -1,3 +1,4 @@
+import json
 from typing import Any, Mapping, Optional
 
 from happyly.caching.cacher import Cacher
@@ -16,7 +17,10 @@ class CacheByRequestIdMixin:
         except Exception:
             pass
         else:
-            self.cacher.add(message, key=req_id)
+            data = json.dumps(
+                {'topic': self.from_topic, 'data': json.load(message.data)}
+            )
+            self.cacher.add(data, key=req_id)
 
     def _get_req_id(self, message: Any) -> str:
         assert self.deserializer is not None
@@ -35,17 +39,6 @@ class CacheByRequestIdMixin:
         result: HandlingResult,
     ):
         super().on_published(original_message, parsed_message, result)
-        if parsed_message is not None:
-            self._rm(parsed_message)
-
-    def on_publishing_failed(
-        self,
-        original_message: Any,
-        parsed_message: Optional[Mapping[str, Any]],
-        result: HandlingResult,
-        error: Exception,
-    ):
-        super().on_publishing_failed(original_message, parsed_message, result, error)
         if parsed_message is not None:
             self._rm(parsed_message)
 

@@ -8,6 +8,16 @@ def test_imports():
     import happyly.serialization
     import happyly.google_pubsub
 
+    from happyly import (
+        Handler,
+        Executor,
+        Listener,
+        Serializer,
+        Deserializer,
+        Schema,
+        Cacher,
+    )
+
     from happyly.handling import Handler, HandlingResult, HandlingResultStatus
     from happyly.listening import Executor, Listener
     from happyly.pubsub import Publisher, Subscriber
@@ -24,3 +34,11 @@ def test_imports():
     from happyly.google_pubsub.serializers import BinaryJSONSerializer
     from happyly.google_pubsub.publishers import GooglePubSubPublisher
     from happyly.google_pubsub.subscribers import GooglePubSubSubscriber
+    from happyly.google_pubsub import (
+        GoogleSimpleSender,
+        GoogleSimpleReceiver,
+        GoogleReceiveAndReplyComponent,
+        GoogleSimpleReceiveAndReply,
+        GoogleCachedReceiver,
+        GoogleCachedReceiveAndReply,
+    )

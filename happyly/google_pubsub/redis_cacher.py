@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 import redis
 
@@ -16,8 +15,8 @@ class RedisCacher(Cacher):
             f'Cache was successfully initialized with Redis client ({host}:{port})'
         )
 
-    def add(self, message: Any, key: str):
-        self.client.set(key, message.data)
+    def add(self, data: str, key: str):
+        self.client.set(key, data)
         _LOGGER.info(f'Cached message with id {key}')
 
     def remove(self, key: str):
