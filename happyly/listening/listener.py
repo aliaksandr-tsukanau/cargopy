@@ -1,7 +1,7 @@
 from typing import Any, TypeVar, Optional
 
-from attr import attrs, attrib
-
+from happyly.handling import Handler
+from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.pubsub import Publisher
 from happyly.pubsub.subscriber import Subscriber
 from happyly.serialization import Deserializer
@@ -12,9 +12,22 @@ D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
 
 
-@attrs(auto_attribs=True)
 class Listener(Executor[D, P]):
-    subscriber: Subscriber = attrib(kw_only=True)
+    def __init__(
+        self,
+        subscriber: Subscriber,
+        handler: Handler,
+        deserializer: Optional[D] = None,
+        publisher: Optional[P] = None,
+    ):
+        assert handler is not DUMMY_HANDLER
+        super().__init__(
+            handler=handler, deserializer=deserializer, publisher=publisher
+        )
+        self.subscriber: Subscriber = subscriber
+
+    def __attrs_post_init__(self):
+        assert self.handler is not DUMMY_HANDLER
 
     def on_acknowledged(self, message: Any):
         pass

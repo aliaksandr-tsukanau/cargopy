@@ -46,6 +46,6 @@ class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleSimpleReceiver):
     ):
         self.from_topic = from_topic
         GoogleSimpleReceiver.__init__(
-            self, handler, input_schema, from_subscription, project
+            self, input_schema, from_subscription, project, handler
         )
         CacheByRequestIdMixin.__init__(self, cacher)

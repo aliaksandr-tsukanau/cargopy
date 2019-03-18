@@ -3,6 +3,7 @@ from typing import Mapping, Any, Optional, TypeVar, Generic
 
 from attr import attrs
 
+from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
 from happyly.pubsub import Publisher
@@ -16,7 +17,7 @@ P = TypeVar("P", bound=Publisher)
 
 @attrs(auto_attribs=True)
 class Executor(Generic[D, P]):
-    handler: Handler
+    handler: Handler = DUMMY_HANDLER
     deserializer: Optional[D] = None
     publisher: Optional[P] = None
 
@@ -87,7 +88,10 @@ class Executor(Generic[D, P]):
 
     def _run_no_deser(self, message: Optional[Any]):
         if message is not None:
-            raise ValueError("No deserializer to parse non-empty message.")
+            if self.handler is DUMMY_HANDLER:
+                self._when_parsing_succeeded(original=message, parsed=message)
+            else:
+                raise ValueError("No deserializer to parse non-empty message.")
         if message is None:
             self._when_parsing_succeeded(original=None, parsed={})
 
