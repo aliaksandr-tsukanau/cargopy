@@ -16,6 +16,7 @@ def test_imports():
         Deserializer,
         Schema,
         Cacher,
+        DUMMY_HANDLER,
     )
 
     from happyly.handling import Handler, HandlingResult, HandlingResultStatus

@@ -9,4 +9,4 @@ from .listening import Executor, Listener
 from .schemas import Schema
 from .caching import Cacher
 from .serialization import Serializer, Deserializer
-from .handling import Handler
+from .handling import Handler, DUMMY_HANDLER
