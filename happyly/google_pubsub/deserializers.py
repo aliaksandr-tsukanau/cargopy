@@ -21,7 +21,7 @@ class JSONDeserializerWithRequestIdRequired(Deserializer):
         return deserialized
 
     def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
-        attributes = json.load(message.data)
+        attributes = json.loads(message.data)
         try:
             return {
                 self.request_id_field: attributes[self.request_id_field],
