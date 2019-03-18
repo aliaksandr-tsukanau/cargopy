@@ -17,11 +17,11 @@ class GoogleSimpleSender(
 ):
     def __init__(
         self,
-        input_schema: Optional[marshmallow.Schema],
         output_schema: marshmallow.Schema,
         to_topic: str,
         project: str,
         handler: Handler = DUMMY_HANDLER,
+        input_schema: Optional[marshmallow.Schema] = None,
     ):
         if input_schema is None:
             deserializer = None
