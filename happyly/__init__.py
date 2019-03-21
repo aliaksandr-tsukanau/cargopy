@@ -5,7 +5,7 @@
 __version__ = '0.3.1'
 
 
-from .listening import Executor, Listener
+from .listening import Executor, Listener, BaseListener
 from .schemas import Schema
 from .caching import Cacher
 from .serialization import Serializer, Deserializer
