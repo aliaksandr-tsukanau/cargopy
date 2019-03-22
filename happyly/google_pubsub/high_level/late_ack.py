@@ -11,7 +11,7 @@ from happyly.google_pubsub import (
 from happyly.listening.listener import LateAckListener
 
 
-class GoogleSimpleReceiver(
+class GoogleLateAckReceiver(
     LateAckListener[JSONDeserializerWithRequestIdRequired, None]
 ):
     def __init__(
@@ -30,7 +30,7 @@ class GoogleSimpleReceiver(
         )
 
 
-class GoogleSimpleReceiveAndReply(
+class GoogleLateAckReceiveAndReply(
     LateAckListener[JSONDeserializerWithRequestIdRequired, GooglePubSubPublisher]
 ):
     def __init__(

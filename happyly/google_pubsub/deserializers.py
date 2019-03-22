@@ -28,5 +28,10 @@ class JSONDeserializerWithRequestIdRequired(Deserializer):
                 self.status_field: self._status_error,
                 self.error_field: repr(error),
             }
-        except AttributeError:
-            raise ValueError(f'message {message} contains no {self.request_id_field}')
+        except KeyError as e:
+            return {
+                self.request_id_field: '',
+                self.status_field: self._status_error,
+                self.error_field: f'{repr(e)}: '
+                f'Message contains no {self.request_id_field}',
+            }

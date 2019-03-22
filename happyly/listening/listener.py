@@ -15,6 +15,26 @@ S = TypeVar("S", bound=BaseSubscriber)
 
 
 class BaseListener(Executor[D, P], Generic[D, P, S]):
+    """
+    Listener is a form of Executor
+    which is able to run pipeline by an event coming from a subscription.
+
+    Listener itself doesn't know how to subscribe,
+    it subscribes via a provided subscriber.
+
+    As any executor, implements managing of stages inside the pipeline
+    (deserialization, handling, serialization, publishing)
+    and contains callbacks between the stages which can be easily overridden.
+
+    As any executor, listener does not implement stages themselves,
+    it takes internal implementation of stages from corresponding components:
+    handler, deserializer, publisher.
+
+    It means that listener is universal
+    and can work with any serialization/messaging technology
+    depending on concrete components provided to listener's constructor.
+    """
+
     def __init__(
         self,
         subscriber: S,
@@ -27,6 +47,9 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
             handler=handler, deserializer=deserializer, publisher=publisher
         )
         self.subscriber: S = subscriber
+        """
+        Provides implementation of how to subscribe.
+        """
 
     def start_listening(self):
         return self.subscriber.subscribe(callback=self.run)
@@ -81,7 +104,7 @@ class LateAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
 
 
 # for compatibility, to be deprecated
-class Listener(EarlyAckListener[D, P]):
+class Listener(EarlyAckListener[D, P], Generic[D, P]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warnings.warn(

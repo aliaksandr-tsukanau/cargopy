@@ -8,8 +8,8 @@ from happyly.google_pubsub.publishers import GooglePubSubPublisher
 from happyly.google_pubsub.serializers import BinaryJSONSerializer
 from happyly.google_pubsub.subscribers import GooglePubSubSubscriber
 from happyly.handling import Handler
-from happyly.listening import Listener
 from happyly.listening.executor import Executor
+from happyly.listening.listener import EarlyAckListener
 
 
 class GoogleSimpleSender(
@@ -37,7 +37,9 @@ class GoogleSimpleSender(
         )
 
 
-class GoogleSimpleReceiver(Listener[JSONDeserializerWithRequestIdRequired, None]):
+class GoogleSimpleReceiver(
+    EarlyAckListener[JSONDeserializerWithRequestIdRequired, None]
+):
     def __init__(
         self,
         input_schema: marshmallow.Schema,
@@ -55,7 +57,7 @@ class GoogleSimpleReceiver(Listener[JSONDeserializerWithRequestIdRequired, None]
 
 
 class GoogleSimpleReceiveAndReply(
-    Listener[JSONDeserializerWithRequestIdRequired, GooglePubSubPublisher]
+    EarlyAckListener[JSONDeserializerWithRequestIdRequired, GooglePubSubPublisher]
 ):
     def __init__(
         self,
