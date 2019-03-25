@@ -18,9 +18,9 @@ class SubscriberWithAck(BaseSubscriber, ABC):
 # for compatibility, to be deprecated
 class Subscriber(SubscriberWithAck, ABC):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         warnings.warn(
             "Please use SubscriberWithAck instead, "
             "Subscriber will be deprecated in the future.",
             DeprecationWarning,
         )
+        super().__init__(*args, **kwargs)

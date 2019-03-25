@@ -1,12 +1,10 @@
 import marshmallow
 
 from happyly import Handler
-from happyly.google_pubsub import (
-    JSONDeserializerWithRequestIdRequired,
-    GooglePubSubSubscriber,
-    GooglePubSubPublisher,
-    BinaryJSONSerializer,
-)
+from ..subscribers import GooglePubSubSubscriber
+from ..publishers import GooglePubSubPublisher
+from ..serializers import BinaryJSONSerializer
+from ..deserializers import JSONDeserializerWithRequestIdRequired
 
 from happyly.listening.listener import LateAckListener
 

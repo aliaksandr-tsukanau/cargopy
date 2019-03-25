@@ -6,3 +6,5 @@ from .simple import (  # noqa: F401
 )
 
 from .with_cache import GoogleCachedReceiveAndReply, GoogleCachedReceiver  # noqa: F401
+
+from .late_ack import GoogleLateAckReceiver, GoogleLateAckReceiveAndReply  # noqa: F401

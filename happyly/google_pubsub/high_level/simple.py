@@ -3,10 +3,10 @@ from typing import Union, Optional
 import marshmallow
 
 from happyly.handling.dummy_handler import DUMMY_HANDLER
-from happyly.google_pubsub.deserializers import JSONDeserializerWithRequestIdRequired
-from happyly.google_pubsub.publishers import GooglePubSubPublisher
-from happyly.google_pubsub.serializers import BinaryJSONSerializer
-from happyly.google_pubsub.subscribers import GooglePubSubSubscriber
+from ..deserializers import JSONDeserializerWithRequestIdRequired
+from ..publishers import GooglePubSubPublisher
+from ..serializers import BinaryJSONSerializer
+from ..subscribers import GooglePubSubSubscriber
 from happyly.handling import Handler
 from happyly.listening.executor import Executor
 from happyly.listening.listener import EarlyAckListener

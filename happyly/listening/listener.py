@@ -139,6 +139,5 @@ class Listener(EarlyAckListener[D, P], Generic[D, P]):
             "Please use EarlyAckListener instead, "
             "Listener will be deprecated in the future.",
             PendingDeprecationWarning,
-            stacklevel=2,
         )
         super().__init__(*args, **kwargs)

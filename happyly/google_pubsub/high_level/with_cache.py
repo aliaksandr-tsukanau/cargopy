@@ -3,10 +3,7 @@ import marshmallow
 from happyly.caching.cacher import Cacher
 from happyly.caching.mixins import CacheByRequestIdMixin
 from happyly.handling import Handler
-from happyly.google_pubsub.high_level.simple import (
-    GoogleSimpleReceiveAndReply,
-    GoogleSimpleReceiver,
-)
+from .simple import GoogleSimpleReceiveAndReply, GoogleSimpleReceiver
 
 
 class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleSimpleReceiveAndReply):

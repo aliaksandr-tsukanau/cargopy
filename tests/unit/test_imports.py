@@ -25,9 +25,17 @@ def test_imports():
     from happyly.serialization import Deserializer, Serializer
 
     from happyly.google_pubsub import (
+        GoogleLateAckReceiver,
+        GoogleLateAckReceiveAndReply,
+        GoogleCachedReceiver,
+        GoogleCachedReceiveAndReply,
         GoogleSimpleReceiver,
         GoogleSimpleSender,
         GoogleReceiveAndReplyComponent,
+        JSONDeserializerWithRequestIdRequired,
+        BinaryJSONSerializer,
+        GooglePubSubPublisher,
+        GooglePubSubSubscriber,
     )
     from happyly.google_pubsub.deserializers import (
         JSONDeserializerWithRequestIdRequired,
@@ -35,11 +43,3 @@ def test_imports():
     from happyly.google_pubsub.serializers import BinaryJSONSerializer
     from happyly.google_pubsub.publishers import GooglePubSubPublisher
     from happyly.google_pubsub.subscribers import GooglePubSubSubscriber
-    from happyly.google_pubsub import (
-        GoogleSimpleSender,
-        GoogleSimpleReceiver,
-        GoogleReceiveAndReplyComponent,
-        GoogleSimpleReceiveAndReply,
-        GoogleCachedReceiver,
-        GoogleCachedReceiveAndReply,
-    )

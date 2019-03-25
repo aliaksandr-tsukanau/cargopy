@@ -4,14 +4,14 @@ from typing import Callable, Any
 from attr import attrs, attrib
 from google.cloud import pubsub_v1
 
-import happyly.pubsub
+from happyly.pubsub import SubscriberWithAck
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
 @attrs(auto_attribs=True)
-class GooglePubSubSubscriber(happyly.pubsub.Subscriber):
+class GooglePubSubSubscriber(SubscriberWithAck):
     project: str
     subscription_name: str
     _subscription_client: pubsub_v1.SubscriberClient = attrib(init=False)
