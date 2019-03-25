@@ -99,7 +99,8 @@ class Executor(Generic[D, P]):
         result: HandlingResult,
     ):
         """
-        Callback which is called right after message was handled (successfully or not).
+        Callback which is called right after message was handled
+        (successfully or not, but without raising an exception).
 
         Override it in your custom Executor/Listener if needed,
         but don't forget to call implementation from base class.
@@ -111,6 +112,23 @@ class Executor(Generic[D, P]):
             Result fetched from handler (also shows if handling was successful)
         """
         _LOGGER.info(f"Message handled, status {result.status}")
+
+    def on_handling_failed(
+        self, original_message: Any, parsed_message: Mapping[str, Any], error: Exception
+    ):
+        """
+        Callback which is called if handler's `on_handling_failed`
+        raises an exception.
+
+        Override it in your custom Executor/Listener if needed,
+        but don't forget to call implementation from base class.
+
+        :param original_message:
+            Message as it has been received, without any deserialization
+        :param parsed_message: Message attributes after deserialization
+        :param error: exception object which was raised
+        """
+        _LOGGER.exception(f'Handler raised an exception.')
 
     def on_published(
         self,
@@ -140,7 +158,7 @@ class Executor(Generic[D, P]):
         error: Exception,
     ):
         """
-        Callback which is called write after message was published successfully.
+        Callback which is called when publisher fails to publish.
 
         Override it in your custom Executor/Listener if needed,
         but don't forget to call implementation from base class.
@@ -155,8 +173,14 @@ class Executor(Generic[D, P]):
         _LOGGER.exception(f"Failed to publish result:\n{result}")
 
     def _when_parsing_succeeded(self, original: Any, parsed: Mapping[str, Any]):
-        result = self.handler(parsed)
-        self.on_handled(original_message=original, parsed_message=parsed, result=result)
+        try:
+            result = self.handler(parsed)
+            self.on_handled(
+                original_message=original, parsed_message=parsed, result=result
+            )
+        except Exception as e:
+            self.on_handling_failed(original, parsed, e)
+            return
         if self.publisher is not None:
             self._try_publish(original, parsed, result)
 
