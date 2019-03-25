@@ -20,7 +20,7 @@ class Subscriber(SubscriberWithAck, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warnings.warn(
-            """Please use SubscriberWithAck instead,
-            Listener will be deprecated in the future""",
-            PendingDeprecationWarning,
+            "Please use SubscriberWithAck instead, "
+            "Subscriber will be deprecated in the future.",
+            DeprecationWarning,
         )

@@ -56,6 +56,12 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
 
 
 class EarlyAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
+    """
+    Acknowledge-aware listener,
+    which performs `ack` right after
+    `on_received` callback is finished.
+    """
+
     def __init__(
         self,
         subscriber: SubscriberWithAck,
@@ -71,6 +77,15 @@ class EarlyAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         )
 
     def on_acknowledged(self, message: Any):
+        """
+        Callback which is called write after message was acknowledged.
+
+        Override it in your custom Executor/Listener if needed,
+        but don't forget to call implementation from base class.
+
+        :param message:
+            Message as it has been received, without any deserialization
+        """
         pass
 
     def _after_on_received(self, message: Optional[Any]):
@@ -80,6 +95,11 @@ class EarlyAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
 
 
 class LateAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
+    """
+    Acknowledge-aware listener,
+    which performs `ack` at the very end of pipeline.
+    """
+
     def __init__(
         self,
         subscriber: SubscriberWithAck,
@@ -95,6 +115,15 @@ class LateAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         )
 
     def on_acknowledged(self, message: Any):
+        """
+        Callback which is called write after message was acknowledged.
+
+        Override it in your custom Executor/Listener if needed,
+        but don't forget to call implementation from base class.
+
+        :param message:
+            Message as it has been received, without any deserialization
+        """
         pass
 
     def _after_on_received(self, message: Optional[Any]):
@@ -106,9 +135,10 @@ class LateAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
 # for compatibility, to be deprecated
 class Listener(EarlyAckListener[D, P], Generic[D, P]):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         warnings.warn(
-            """Please use EarlyAckListener instead,
-            Listener will be deprecated in the future""",
+            "Please use EarlyAckListener instead, "
+            "Listener will be deprecated in the future.",
             PendingDeprecationWarning,
+            stacklevel=2,
         )
+        super().__init__(*args, **kwargs)
