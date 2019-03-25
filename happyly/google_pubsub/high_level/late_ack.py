@@ -18,7 +18,9 @@ class GoogleLateAckReceiver(
         from_subscription: str,
         project: str,
         handler: Handler,
+        from_topic: str = '',
     ):
+        self.from_topic = from_topic
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )
@@ -39,7 +41,9 @@ class GoogleLateAckReceiveAndReply(
         output_schema: marshmallow.Schema,
         to_topic: str,
         project: str,
+        from_topic: str = '',
     ):
+        self.from_topic = from_topic
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )

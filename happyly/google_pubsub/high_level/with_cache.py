@@ -18,7 +18,6 @@ class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleSimpleReceiveAndR
         project: str,
         cacher: Cacher,
     ):
-        self.from_topic = from_topic
         GoogleSimpleReceiveAndReply.__init__(
             self,
             handler,
@@ -27,6 +26,7 @@ class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleSimpleReceiveAndR
             output_schema,
             to_topic,
             project,
+            from_topic,
         )
         CacheByRequestIdMixin.__init__(self, cacher)
 
@@ -41,8 +41,7 @@ class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleSimpleReceiver):
         project: str,
         cacher: Cacher,
     ):
-        self.from_topic = from_topic
         GoogleSimpleReceiver.__init__(
-            self, input_schema, from_subscription, project, handler
+            self, input_schema, from_subscription, project, handler, from_topic
         )
         CacheByRequestIdMixin.__init__(self, cacher)
