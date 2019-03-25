@@ -1,7 +1,6 @@
 """Python library for Pub/Sub message handling."""
 
 # flake8: noqa F401
-import re
 
 __version__ = '0.4.1'
 
