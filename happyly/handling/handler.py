@@ -34,7 +34,10 @@ class Handler(ABC):
         """
         Applies fallback logic using a provided message when `handle` fails,
         optionally gives back one or more results.
-        Enforces users of `Handler` class to provide explicit strategy for errors
+        Enforces users of `Handler` class to provide explicit strategy for errors.
+
+        If you want to propagate error further to the underlying Executor/Handler,
+        just raise an exception here.
 
         :param message: A parsed message as a dictionary of attributes
         :param error: Error raised by `handle`
