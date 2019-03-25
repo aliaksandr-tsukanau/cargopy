@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class RedisCacher(Cacher):
-    def __init__(self, host: str, port: str, prefix: str = ''):
+    def __init__(self, host: str, port: int, prefix: str = ''):
         self.prefix = prefix
         self.client = redis.StrictRedis(host=host, port=port)
         _LOGGER.info(
