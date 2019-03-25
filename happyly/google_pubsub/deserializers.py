@@ -43,7 +43,7 @@ class JSONDeserializerWithRequestIdRequired(Deserializer):
     def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
         """
         Provides a fallback result when `deserialize` fails.
-        Returns a dict with attibutes:
+        Returns a dict with attributes:
         * <request id field>
         * <status field>
         * <error field>
