@@ -1,3 +1,4 @@
+import logging
 import warnings
 from typing import Any, TypeVar, Optional, Generic
 
@@ -7,6 +8,9 @@ from happyly.pubsub import Publisher
 from happyly.pubsub.subscriber import BaseSubscriber, SubscriberWithAck
 from happyly.serialization import Deserializer
 from .executor import Executor
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 D = TypeVar("D", bound=Deserializer)
@@ -86,7 +90,7 @@ class EarlyAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         :param message:
             Message as it has been received, without any deserialization
         """
-        pass
+        _LOGGER.info('Message acknowledged')
 
     def _after_on_received(self, message: Optional[Any]):
         self.subscriber.ack(message)
@@ -124,7 +128,7 @@ class LateAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         :param message:
             Message as it has been received, without any deserialization
         """
-        pass
+        _LOGGER.info('Message acknowledged')
 
     def _after_on_received(self, message: Optional[Any]):
         super()._after_on_received(message)
