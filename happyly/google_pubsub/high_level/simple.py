@@ -38,14 +38,14 @@ class GoogleSimpleSender(
 
 class GoogleSimpleReceiver(GoogleBaseReceiver):
     def _after_on_received(self, message: Optional[Any]):
-        super()._after_on_received(message)
         self.ack(message)
+        super()._after_on_received(message)
 
 
 class GoogleSimpleReceiveAndReply(GoogleBaseReceiveAndReply):
     def _after_on_received(self, message: Optional[Any]):
-        super()._after_on_received(message)
         self.ack(message)
+        super()._after_on_received(message)
 
 
 # for compatibility
