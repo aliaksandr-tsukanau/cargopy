@@ -21,7 +21,6 @@ requires = [
     "attrs>=18.2",
     "google-cloud-pubsub>=0.37.2",
     "marshmallow>=2.15,<3",
-    "redis>=3.0",
 ]
 requires-python = ">=3.6"
 
@@ -30,6 +29,7 @@ requires-python = ">=3.6"
 dev = [
     "bump2version>=0.5.10",  # use bump2version while bumpversion project is inactive
     "pre-commit>=1.14.4",
+    "redis>=3.0",
 ]
 test = ["pytest>=4.3.0", "tox>=3.7.0"]
 
