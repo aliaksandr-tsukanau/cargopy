@@ -40,4 +40,4 @@ Documentation = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
 
 [tool.black]
 line-length = 88
-py36 = true
+target-version = ["py36", "py37"]
