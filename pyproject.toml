@@ -31,6 +31,7 @@ redis = ["redis>=3.0"]
 dev = [
     "bump2version>=0.5.10",  # use bump2version while bumpversion project is inactive
     "pre-commit>=1.14.4",
+    "sphinx>=1.8.5",
 ]
 test = ["pytest>=4.3.0", "tox>=3.7.0"]
 
