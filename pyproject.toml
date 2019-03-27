@@ -25,11 +25,12 @@ requires = [
 requires-python = ">=3.6"
 
 [tool.flit.metadata.requires-extra]
+# install this only if you need redis compatibility stuff, like `redis_cacher`
+redis = ["redis>=3.0"]
 # these are special extras for flit
 dev = [
     "bump2version>=0.5.10",  # use bump2version while bumpversion project is inactive
     "pre-commit>=1.14.4",
-    "redis>=3.0",
 ]
 test = ["pytest>=4.3.0", "tox>=3.7.0"]
 
