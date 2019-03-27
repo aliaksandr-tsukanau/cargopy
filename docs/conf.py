@@ -14,12 +14,15 @@ from typing import Dict
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 # -- Project information -----------------------------------------------------
+
+import happyly  # noqa
 
 project = 'Happyly'
 copyright = '2019, Alexander Tsukanov'
@@ -28,7 +31,7 @@ author = 'Alexander Tsukanov'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.5.0'
+release = happyly.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,7 +45,9 @@ release = '0.5.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',  # support Google-styled docstrings
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
@@ -74,6 +79,25 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
+
+# generate auto summary
+autosummary_generate = True
+
+# autodoc: retain original methods order, don't sort them alphabetically
+autodoc_member_order = 'bysource'
+
+# concatenate docstring from class and from __init__
+autoclass_content = 'both'
+
+# use locally stored mathjax js
+# see also html_static_path
+# mathjax_path = 'mathjax-2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+
+# 'any': if non-prefixed `text` is encountered, consider it having this role
+# as a result, such text will try to properly reference desired object
+# http://www.sphinx-doc.org/en/stable/markup/inline.html?highlight=roles#role-any
+# or 'code': treat `text` as ``text`` creating code snippet
+default_role = 'code'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -184,7 +208,7 @@ epub_exclude_files = ['search.html']
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3/', None)}
 
 # -- Options for todo extension ----------------------------------------------
 
