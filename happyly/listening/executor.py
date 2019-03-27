@@ -195,9 +195,12 @@ class Executor(Generic[D, P]):
             return
         if self.publisher is not None:
             self._try_publish(original, parsed, result)
+        else:
+            self.on_finished(original_message=original, error=None)
 
     def _when_parsing_failed(self, message: Any, error: Exception):
         if self.publisher is None:
+            self.on_finished(original_message=message, error=None)
             return
         assert self.deserializer is not None
         try:

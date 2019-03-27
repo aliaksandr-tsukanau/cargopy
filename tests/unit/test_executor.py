@@ -11,9 +11,11 @@ from tests.unit.test_handler import TestHandler
 @patch('test_executor.Executor.on_handled')
 @patch('test_executor.Executor.on_published')
 @patch('test_executor.Executor.on_publishing_failed')
+@patch('test_executor.Executor.on_finished')
 @patch('test_executor.TestHandler.__call__', return_value=HandlingResult.ok(42))
 def test_executor_no_input(
     handler,
+    on_finished,
     on_publishing_failed,
     on_published,
     on_handled,
@@ -36,3 +38,4 @@ def test_executor_no_input(
     on_publishing_failed.assert_not_called()
     on_deserialized.assert_not_called()
     on_deserialization_failed.assert_not_called()
+    on_finished.assert_called_with(original_message=None, error=None)
