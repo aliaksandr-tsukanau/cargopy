@@ -12,10 +12,8 @@ from .high_level import (
     GoogleBaseReceiveAndReply,
 )
 
-try:
-    from .redis_cacher import RedisCacher
-except ImportError:
-    pass
+
+from .redis_cacher import RedisCacher
 from .deserializers import JSONDeserializerWithRequestIdRequired
 from .serializers import BinaryJSONSerializer
 from .publishers import GooglePubSubPublisher
