@@ -152,7 +152,7 @@ class Executor(Generic[D, P]):
         :param result:
             Result fetched from handler (also shows if handling was successful)
         """
-        _LOGGER.info(f"Published result:\n{result}")
+        _LOGGER.info(f"Published result: {result}")
 
     def on_publishing_failed(
         self,

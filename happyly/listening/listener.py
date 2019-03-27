@@ -123,9 +123,9 @@ class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
     which performs `ack` at the very end of pipeline.
     """
 
-    def _after_on_received(self, message: Optional[Any]):
-        super()._after_on_received(message)
-        self.ack(message)
+    def on_finished(self, original_message: Any, error: Optional[Exception]):
+        self.ack(original_message)
+        super().on_finished(original_message, error)
 
 
 # for compatibility, to be deprecated
