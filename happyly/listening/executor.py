@@ -7,7 +7,7 @@ from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
 from happyly.pubsub import Publisher
-from serialization import DUMMY_DESERIALIZER
+from happyly.serialization import DUMMY_DESERIALIZER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class Executor(Generic[D, P]):
     Provides implementation of handling stage to Executor.
     """
 
-    deserializer: D = DUMMY_DESERIALIZER
+    deserializer: Optional[D] = None
     """
     Provides implementation of deserialization stage to Executor.
 
@@ -52,6 +52,10 @@ class Executor(Generic[D, P]):
     If not present, no publishing is performed.
     """
 
+    def __attrs_post_init__(self):
+        if self.deserializer is None:
+            self.deserializer = DUMMY_DESERIALIZER
+
     def on_received(self, message: Any):
         """
         Callback which is called as soon as pipeline is run.
@@ -61,7 +65,7 @@ class Executor(Generic[D, P]):
 
         :param message: Message as it has been received, without any deserialization
         """
-        _LOGGER.info(f"Received message:\n {message}")
+        _LOGGER.info(f"Received message: {message}")
 
     def on_deserialized(self, original_message: Any, parsed_message: Mapping[str, Any]):
         """
@@ -75,7 +79,7 @@ class Executor(Generic[D, P]):
         :param parsed_message: Message attributes after deserialization
         """
         _LOGGER.info(
-            f"Message successfully deserialized into attributes:\n {parsed_message}"
+            f"Message successfully deserialized into attributes: {parsed_message}"
         )
 
     def on_deserialization_failed(self, message: Any, error: Exception):
@@ -89,7 +93,7 @@ class Executor(Generic[D, P]):
         :param error: exception object which was raised
         """
         _LOGGER.exception(
-            f"Was not able to deserialize the following message:\n{message}"
+            f"Was not able to deserialize the following message: {message}"
         )
 
     def on_handled(
@@ -170,7 +174,7 @@ class Executor(Generic[D, P]):
             Result fetched from handler (also shows if handling was successful)
         :param error: exception object which was raised
         """
-        _LOGGER.exception(f"Failed to publish result:\n{result}")
+        _LOGGER.exception(f"Failed to publish result: {result}")
 
     def on_finished(self, original_message: Any, error: Optional[Exception]):
         """
@@ -199,10 +203,11 @@ class Executor(Generic[D, P]):
             self.on_finished(original_message=original, error=None)
 
     def _when_parsing_failed(self, message: Any, error: Exception):
+        assert self.deserializer is not None
+
         if self.publisher is None:
             self.on_finished(original_message=message, error=None)
             return
-        assert self.deserializer is not None
         try:
             result = self.deserializer.build_error_result(message, error)
             handling_result = HandlingResult.err(result)
@@ -231,6 +236,7 @@ class Executor(Generic[D, P]):
             self.on_finished(original, error=e)
 
     def _after_on_received(self, message: Optional[Any]):
+        assert self.deserializer is not None
         try:
             parsed = self.deserializer.deserialize(message)
         except Exception as e:
@@ -250,3 +256,10 @@ class Executor(Generic[D, P]):
         """
         self.on_received(message)
         self._after_on_received(message)
+
+
+if __name__ == '__main__':
+
+    logging.basicConfig(level=logging.INFO)
+
+    Executor(lambda m: HandlingResult.ok(42)).run()  # type: ignore

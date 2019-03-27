@@ -7,6 +7,8 @@ class DummyDeserializer(Deserializer):
     def deserialize(self, message) -> Mapping[str, Any]:
         if isinstance(message, Mapping):
             return message
+        elif message is None:
+            return {}
         else:
             raise ValueError(
                 'Dummy deserializer requires message attributes '
@@ -17,4 +19,4 @@ class DummyDeserializer(Deserializer):
         raise error
 
 
-DUMMY_DESERIALIZER = DummyDeserializer()
+DUMMY_DESERIALIZER: DummyDeserializer = DummyDeserializer()

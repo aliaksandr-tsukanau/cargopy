@@ -4,6 +4,7 @@ from unittest.mock import patch
 from happyly import Deserializer
 from happyly.handling import HandlingResult, HandlingResultStatus
 from happyly.listening import Executor
+from happyly.serialization import DUMMY_DESERIALIZER
 from tests.unit.test_handler import TestHandler
 
 
@@ -25,8 +26,8 @@ def test_executor_no_input(
     on_deserialized,
     on_received,
 ):
-    executor = Executor(handler=TestHandler(), deserializer=None, publisher=None)
-    assert executor.deserializer is None
+    executor = Executor(handler=TestHandler())
+    assert executor.deserializer is DUMMY_DESERIALIZER
     assert executor.publisher is None
     executor.run()
     on_received.assert_called_with(None)
