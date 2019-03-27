@@ -10,6 +10,6 @@ class GoogleLateAckReceiver(GoogleBaseReceiver):
 
 
 class GoogleLateAckReceiveAndReply(GoogleBaseReceiveAndReply):
-    def run(self, message: Optional[Any] = None):
-        super().run(message)
-        self.ack(message)
+    def on_finished(self, original_message: Any, error: Optional[Exception]):
+        self.ack(original_message)
+        super().on_finished(original_message, error)

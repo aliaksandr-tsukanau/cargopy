@@ -8,6 +8,8 @@ from .high_level import (
     GoogleCachedReceiver,
     GoogleLateAckReceiver,
     GoogleLateAckReceiveAndReply,
+    GoogleBaseReceiver,
+    GoogleBaseReceiveAndReply,
 )
 
 from .redis_cacher import RedisCacher
