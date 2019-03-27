@@ -10,7 +10,7 @@ class RedisCacher(Cacher):
         try:
             import redis
         except ImportError as e:
-            raise ImportError('Please install redis>3.0 to use this feature.') from e
+            raise ImportError('Please install redis>=3.0 to use this feature.') from e
         self.prefix = prefix
         self.client = redis.StrictRedis(host=host, port=port)
         _LOGGER.info(
@@ -20,19 +20,16 @@ class RedisCacher(Cacher):
             _LOGGER.info(f'Using prefix {self.prefix}')
 
     def add(self, data: str, key: str):
-        full_key = f'{self.prefix}{key}'
-        self.client.set(full_key, data)
+        self.client.hset(self.prefix, key, data)
         _LOGGER.info(f'Cached message with id {key}')
 
     def remove(self, key: str):
-        full_key = f'{self.prefix}{key}'
-        self.client.delete(full_key)
+        self.client.hdel(self.prefix, key)
         _LOGGER.info(f'Message with id {key} was removed from cache')
 
     def get(self, key: str):
-        full_key = f'{self.prefix}{key}'
-        self.client.get(full_key)
+        self.client.hget(self.prefix, key)
 
     def get_all(self):
-        keys: str = self.client.keys()
-        return [self.client.get(k) for k in keys if k.startswith(self.prefix)]
+        keys = self.client.hkeys(self.prefix)
+        return keys
