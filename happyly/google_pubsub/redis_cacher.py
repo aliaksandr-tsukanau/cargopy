@@ -32,4 +32,4 @@ class RedisCacher(Cacher):
 
     def get_all(self):
         keys = self.client.hkeys(self.prefix)
-        return keys
+        return [self.client.hget(self.prefix, k) for k in keys]
