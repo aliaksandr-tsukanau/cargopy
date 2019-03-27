@@ -172,6 +172,17 @@ class Executor(Generic[D, P]):
         """
         _LOGGER.exception(f"Failed to publish result:\n{result}")
 
+    def on_finished(self, original_message: Any, error: Optional[Exception]):
+        """
+        Callback which is called when pipeline finishes its execution.
+        Is guaranteed to be called, whether pipeline succeeds or not.
+
+        :param original_message:
+            Message as it has been received, without any deserialization
+        :param error: exception object which was raised or None
+        """
+        _LOGGER.info('Pipeline execution finished.')
+
     def _when_parsing_succeeded(self, original: Any, parsed: Mapping[str, Any]):
         try:
             result = self.handler(parsed)
@@ -180,6 +191,7 @@ class Executor(Generic[D, P]):
             )
         except Exception as e:
             self.on_handling_failed(original, parsed, e)
+            self.on_finished(original, e)
             return
         if self.publisher is not None:
             self._try_publish(original, parsed, result)
@@ -191,10 +203,11 @@ class Executor(Generic[D, P]):
         try:
             result = self.deserializer.build_error_result(message, error)
             handling_result = HandlingResult.err(result)
-        except Exception:
+        except Exception as new_err:
             _LOGGER.exception(
                 "Deserialization failed and error result cannot be built."
             )
+            self.on_finished(message, new_err)
         else:
             self._try_publish(original=message, parsed=None, result=handling_result)
 
@@ -207,10 +220,12 @@ class Executor(Generic[D, P]):
             self.on_published(
                 original_message=original, parsed_message=parsed, result=result
             )
+            self.on_finished(original, error=None)
         except Exception as e:
             self.on_publishing_failed(
                 original_message=original, parsed_message=parsed, result=result, error=e
             )
+            self.on_finished(original, error=e)
 
     def _run_no_deser(self, message: Optional[Any]):
         if message is not None:

@@ -59,81 +59,72 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         return self.subscriber.subscribe(callback=self.run)
 
 
-class EarlyAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
+class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
+    """
+    Acknowledge-aware listener.
+    Defines `ListenerWithAck.ack()`.
+    Subclass ListenerWithAck and specify when to ack
+    by overriding the corresponding callbacks.
+    """
+
+    def __init__(
+        self,
+        subscriber: SubscriberWithAck,
+        handler: Handler,
+        deserializer: Optional[D] = None,
+        publisher: Optional[P] = None,
+    ):
+        super().__init__(
+            handler=handler,
+            deserializer=deserializer,
+            publisher=publisher,
+            subscriber=subscriber,
+        )
+
+    def on_acknowledged(self, message: Any):
+        """
+        Callback which is called write after message was acknowledged.
+
+        Override it in your custom Executor/Listener if needed,
+        but don't forget to call implementation from base class.
+
+        :param message:
+            Message as it has been received, without any deserialization
+        """
+        _LOGGER.info('Message acknowledged')
+
+    def ack(self, message: Any):
+        """
+        Acknowledge the message using implementation from subscriber,
+        then log success.
+        :param message:
+            Message as it has been received, without any deserialization
+        """
+        self.subscriber.ack(message)
+        self.on_acknowledged(message)
+
+
+class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
     Acknowledge-aware listener,
     which performs `ack` right after
     `on_received` callback is finished.
     """
 
-    def __init__(
-        self,
-        subscriber: SubscriberWithAck,
-        handler: Handler,
-        deserializer: Optional[D] = None,
-        publisher: Optional[P] = None,
-    ):
-        super().__init__(
-            handler=handler,
-            deserializer=deserializer,
-            publisher=publisher,
-            subscriber=subscriber,
-        )
-
-    def on_acknowledged(self, message: Any):
-        """
-        Callback which is called write after message was acknowledged.
-
-        Override it in your custom Executor/Listener if needed,
-        but don't forget to call implementation from base class.
-
-        :param message:
-            Message as it has been received, without any deserialization
-        """
-        _LOGGER.info('Message acknowledged')
-
     def _after_on_received(self, message: Optional[Any]):
-        self.subscriber.ack(message)
-        self.on_acknowledged(message)
+        self.ack(message)
         super()._after_on_received(message)
 
 
-class LateAckListener(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
+class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
     Acknowledge-aware listener,
     which performs `ack` at the very end of pipeline.
     """
 
-    def __init__(
-        self,
-        subscriber: SubscriberWithAck,
-        handler: Handler,
-        deserializer: Optional[D] = None,
-        publisher: Optional[P] = None,
-    ):
-        super().__init__(
-            handler=handler,
-            deserializer=deserializer,
-            publisher=publisher,
-            subscriber=subscriber,
-        )
-
-    def on_acknowledged(self, message: Any):
-        """
-        Callback which is called write after message was acknowledged.
-
-        Override it in your custom Executor/Listener if needed,
-        but don't forget to call implementation from base class.
-
-        :param message:
-            Message as it has been received, without any deserialization
-        """
-        _LOGGER.info('Message acknowledged')
-
     def _after_on_received(self, message: Optional[Any]):
         super()._after_on_received(message)
-        self.subscriber.ack(message)
-        self.on_acknowledged(message)
+        self.ack(message)
 
 
 # for compatibility, to be deprecated
