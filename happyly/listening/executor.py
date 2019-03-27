@@ -7,7 +7,7 @@ from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
 from happyly.pubsub import Publisher
-
+from serialization import DUMMY_DESERIALIZER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class Executor(Generic[D, P]):
     Provides implementation of handling stage to Executor.
     """
 
-    deserializer: Optional[D] = None
+    deserializer: D = DUMMY_DESERIALIZER
     """
     Provides implementation of deserialization stage to Executor.
 
@@ -230,18 +230,8 @@ class Executor(Generic[D, P]):
             )
             self.on_finished(original, error=e)
 
-    def _run_no_deser(self, message: Optional[Any]):
-        if message is not None:
-            if self.handler is DUMMY_HANDLER:
-                self._when_parsing_succeeded(original=message, parsed=message)
-            else:
-                raise ValueError("No deserializer to parse non-empty message.")
-        if message is None:
-            self._when_parsing_succeeded(original=None, parsed={})
-
     def _after_on_received(self, message: Optional[Any]):
         try:
-            assert self.deserializer is not None
             parsed = self.deserializer.deserialize(message)
         except Exception as e:
             self.on_deserialization_failed(message, error=e)
@@ -249,10 +239,6 @@ class Executor(Generic[D, P]):
         else:
             self.on_deserialized(message, parsed)
             self._when_parsing_succeeded(original=message, parsed=parsed)
-
-    def _run_with_deser(self, message: Optional[Any]):
-        self.on_received(message)
-        self._after_on_received(message)
 
     def run(self, message: Optional[Any] = None):
         """
@@ -262,7 +248,5 @@ class Executor(Generic[D, P]):
             if the executor was instantiated with neither a deserializer nor a handler
             (useful to quickly publish message attributes by hand)
         """
-        if self.deserializer is None:
-            self._run_no_deser(message)
-        else:
-            self._run_with_deser(message)
+        self.on_received(message)
+        self._after_on_received(message)

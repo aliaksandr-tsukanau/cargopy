@@ -7,6 +7,7 @@ from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.pubsub import Publisher
 from happyly.pubsub.subscriber import BaseSubscriber, SubscriberWithAck
 from happyly.serialization import Deserializer
+from serialization import DUMMY_DESERIALIZER
 from .executor import Executor
 
 
@@ -43,7 +44,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         self,
         subscriber: S,
         handler: Handler,
-        deserializer: Optional[D] = None,
+        deserializer: D = DUMMY_DESERIALIZER,
         publisher: Optional[P] = None,
     ):
         assert handler is not DUMMY_HANDLER
@@ -71,7 +72,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         self,
         subscriber: SubscriberWithAck,
         handler: Handler,
-        deserializer: Optional[D] = None,
+        deserializer: D = DUMMY_DESERIALIZER,
         publisher: Optional[P] = None,
     ):
         super().__init__(
