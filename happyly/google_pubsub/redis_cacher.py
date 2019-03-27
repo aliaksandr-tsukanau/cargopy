@@ -9,8 +9,8 @@ class RedisCacher(Cacher):
     def __init__(self, host: str, port: int, prefix: str = ''):
         try:
             import redis
-        except ImportError:
-            raise ImportError('Please install redis>3.0 to use this feature.')
+        except ImportError as e:
+            raise ImportError('Please install redis>3.0 to use this feature.') from e
         self.prefix = prefix
         self.client = redis.StrictRedis(host=host, port=port)
         _LOGGER.info(
