@@ -27,6 +27,8 @@ if os.environ.get('READTHEDOCS'):
     from pip._internal import main as pipmain
 
     pipmain(['install', 'flit'])
+    # workaround for pip#5882
+    os.environ.pop('PIP_REQ_TRACKER', None)
 
     # ...and then use flit to install the package and all its dependencies
     import flit
