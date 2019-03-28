@@ -36,7 +36,9 @@ dev = [
 test = ["pytest>=4.3.0", "tox>=3.7.0"]
 
 [tool.flit.metadata.urls]
-Documentation = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
+# these links will be shown on pypi page for the project
+Documentation = "https://happyly.readthedocs.io/en/latest/"
+Tutorial = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
 
 [tool.black]
 line-length = 88
