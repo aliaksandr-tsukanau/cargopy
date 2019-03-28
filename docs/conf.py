@@ -31,7 +31,7 @@ if os.environ.get('READTHEDOCS'):
     # ...and then use flit to install the package and all its dependencies
     import flit
 
-    flit.main(['install', '--deps=all'])
+    flit.main(['-f', '../pyproject.toml', 'install', '--deps=all'])
 
 import happyly  # noqa
 
