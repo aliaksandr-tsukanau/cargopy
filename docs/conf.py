@@ -40,7 +40,7 @@ import happyly  # noqa
 # -- Project information -----------------------------------------------------
 
 project = 'Happyly'
-copyright = '2019, Alexander Tsukanov'
+copyright = '2019, Equeum'
 author = 'Alexander Tsukanov'
 
 # The full version, including alpha/beta/rc tags
