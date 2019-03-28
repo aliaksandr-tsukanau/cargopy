@@ -43,10 +43,10 @@ project = 'Happyly'
 copyright = '2019, Alexander Tsukanov'
 author = 'Alexander Tsukanov'
 
-# The short X.Y version
-version = ''
 # The full version, including alpha/beta/rc tags
 release = happyly.__version__
+# The short X.Y version
+version = '.'.join(release.split('.')[:2])
 
 
 # -- General configuration ---------------------------------------------------
