@@ -1,5 +1,10 @@
+import logging
+from typing import Optional, Union, Any, Mapping
+
 import marshmallow
 
+from happyly.handling import HandlingResult
+from happyly.logs.request_id import RequestIdLogger
 from ..subscribers import GooglePubSubSubscriber
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
@@ -8,7 +13,100 @@ from happyly import Handler
 from happyly.listening.listener import ListenerWithAck
 
 
-class GoogleBaseReceiver(ListenerWithAck[JSONDeserializerWithRequestIdRequired, None]):
+_LOGGER = logging.getLogger(__name__)
+
+
+def _format_message(message):
+    return f'data: {message.data}, attributes: {message.attributes}'
+
+
+class _BaseGoogleListenerWithRequestIdLogger(
+    ListenerWithAck[
+        JSONDeserializerWithRequestIdRequired, Union[None, GooglePubSubPublisher]
+    ]
+):
+    """
+    Introduces advanced logging based on topic and request id.
+    """
+
+    def __init__(
+        self,
+        subscriber: GooglePubSubSubscriber,
+        handler: Handler,
+        deserializer: Optional[JSONDeserializerWithRequestIdRequired] = None,
+        publisher: Optional[GooglePubSubPublisher] = None,
+        from_topic: str = '',
+    ):
+        self.from_topic = from_topic
+        super().__init__(
+            subscriber=subscriber,
+            publisher=publisher,
+            handler=handler,
+            deserializer=deserializer,
+        )
+
+    def on_received(self, message: Any):
+        logger = RequestIdLogger(_LOGGER, self.from_topic)
+        logger.info(f"Received message: {_format_message(message)}")
+
+    def on_deserialized(self, original_message: Any, parsed_message: Mapping[str, Any]):
+        request_id = ''
+        if self.deserializer is not None:
+            request_id = parsed_message[self.deserializer.request_id_field]
+
+        logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
+        logger.debug(
+            f"Message successfully deserialized into attributes: {parsed_message}"
+        )
+
+    def on_deserialization_failed(self, message: Any, error: Exception):
+        logger = RequestIdLogger(_LOGGER, self.from_topic)
+        logger.exception(
+            f"Was not able to deserialize the following message\n"
+            f"{_format_message(message)}"
+        )
+
+    def on_handled(
+        self,
+        original_message: Any,
+        parsed_message: Mapping[str, Any],
+        result: HandlingResult,
+    ):
+        request_id = ''
+        if self.deserializer is not None:
+            request_id = parsed_message[self.deserializer.request_id_field]
+        logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
+        logger.info(f"Message handled, status {result.status}")
+
+    def on_published(
+        self,
+        original_message: Any,
+        parsed_message: Optional[Mapping[str, Any]],
+        result: HandlingResult,
+    ):
+        request_id = ''
+        if parsed_message is not None and self.deserializer is not None:
+            request_id = parsed_message[self.deserializer.request_id_field]
+
+        logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
+        logger.info(f"Published result: {result.data}")
+
+    def on_publishing_failed(
+        self,
+        original_message: Any,
+        parsed_message: Optional[Mapping[str, Any]],
+        result: HandlingResult,
+        error: Exception,
+    ):
+        request_id = ''
+        if parsed_message is not None and self.deserializer is not None:
+            request_id = parsed_message[self.deserializer.request_id_field]
+
+        logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
+        logger.exception(f"Failed to publish result: {result.data}")
+
+
+class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
     def __init__(
         self,
         input_schema: marshmallow.Schema,
@@ -27,9 +125,7 @@ class GoogleBaseReceiver(ListenerWithAck[JSONDeserializerWithRequestIdRequired, 
         )
 
 
-class GoogleBaseReceiveAndReply(
-    ListenerWithAck[JSONDeserializerWithRequestIdRequired, GooglePubSubPublisher]
-):
+class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
     def __init__(
         self,
         handler: Handler,

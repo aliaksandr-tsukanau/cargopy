@@ -2,7 +2,7 @@ from logging import Logger
 
 from attr import attrs
 
-from logs.base import BaseLogger
+from happyly.logs.base import BaseLogger
 
 
 @attrs(auto_attribs=True)
