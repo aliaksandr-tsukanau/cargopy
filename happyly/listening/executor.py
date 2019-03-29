@@ -206,7 +206,7 @@ class Executor(Generic[D, P]):
         assert self.deserializer is not None
 
         if self.publisher is None:
-            self.on_finished(original_message=message, error=None)
+            self.on_finished(original_message=message, error=error)
             return
         try:
             result = self.deserializer.build_error_result(message, error)
