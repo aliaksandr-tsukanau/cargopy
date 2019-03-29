@@ -12,4 +12,5 @@ API Reference
    happyly.Serializer
    happyly.Deserializer
    happyly.Handler
-   happyly.DUMMY_HANLDER
+   happyly.DUMMY_HANDLER
+   happyly.handling.dummy_handler._DummyHandler
