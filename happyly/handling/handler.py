@@ -21,9 +21,10 @@ class Handler(ABC):
         When fails, calls `on_handling_failed`
 
         :param message: A parsed message as a dictionary of attributes
+
         :return: None if no result is extracted from handling,
-        a dictionary of attributes for single result
-        or a list of dictionaries if handling provides multiple results
+            a dictionary of attributes for single result
+            or a list of dictionaries if handling provides multiple results
         """
         raise _no_base_impl
 
@@ -42,8 +43,8 @@ class Handler(ABC):
         :param message: A parsed message as a dictionary of attributes
         :param error: Error raised by `handle`
         :return: None if no result is extracted from handling,
-        a dictionary of attributes for single result
-        or a list of dictionaries if handling provides multiple results
+            a dictionary of attributes for single result
+            or a list of dictionaries if handling provides multiple results
         """
         raise _no_base_impl
 

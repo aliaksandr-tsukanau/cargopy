@@ -249,6 +249,7 @@ class Executor(Generic[D, P]):
     def run(self, message: Optional[Any] = None):
         """
         Method that starts execution of pipeline stages.
+
         :param message: Message as is, without deserialization.
             Or message attributes
             if the executor was instantiated with neither a deserializer nor a handler
