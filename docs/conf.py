@@ -35,6 +35,33 @@ if os.environ.get('READTHEDOCS'):
 
     flit.main(['-f', '../pyproject.toml', 'install', '--extras=all'])
 
+
+# workaround python-attrs/attrs#523
+# (it hides some class attributes in members summary)
+def _workaround_attrs():
+    import attr
+
+    attrs = attr.s
+
+    def attrs_wrapper(*args, **kwargs):
+        def wrap(cls):
+            cls = attrs(*args, **kwargs)(cls)
+            for field in attr.fields(cls):
+                if not hasattr(cls, field.name):
+                    setattr(cls, field.name, field.default)
+            return cls
+
+        if len(args) == 1 and not kwargs and isinstance(args[0], type):
+            c = args[0]
+            args = ()
+            return wrap(c)
+        return wrap
+
+    attr.s = attr.attrs = attr.attributes = attrs_wrapper
+
+
+_workaround_attrs()
+
 import happyly  # noqa
 
 # -- Project information -----------------------------------------------------
