@@ -10,6 +10,7 @@ Welcome to Happyly's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   tutorial
    apidoc
 
 
