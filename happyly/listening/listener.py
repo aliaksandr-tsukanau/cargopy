@@ -1,3 +1,9 @@
+"""
+:class:`~happyly.listening.listener.BaseListener` and its subclasses.
+Listener is a form of Executor
+which is able to run pipeline by an event coming from a subscription.
+"""
+
 import logging
 import warnings
 from typing import Any, TypeVar, Optional, Generic
@@ -100,6 +106,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         """
         Acknowledge the message using implementation from subscriber,
         then log success.
+
         :param message:
             Message as it has been received, without any deserialization
         """
@@ -132,6 +139,12 @@ class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
 
 # for compatibility, to be deprecated
 class Listener(EarlyAckListener[D, P], Generic[D, P]):
+    """
+    .. deprecated:: 0.6.0
+
+        use :class:`EarlyAckListener` instead.
+    """
+
     def __init__(self, *args, **kwargs):
         warnings.warn(
             "Please use EarlyAckListener instead, "
