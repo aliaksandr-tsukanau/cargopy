@@ -7,7 +7,7 @@ Welcome to Happyly's documentation!
 ===================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    tutorial
