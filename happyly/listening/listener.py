@@ -39,6 +39,11 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
     depending on concrete components provided to listener's constructor.
     """
 
+    subscriber: S
+    """
+    Provides implementation of how to subscribe.
+    """
+
     def __init__(
         self,
         subscriber: S,
@@ -51,10 +56,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         super().__init__(
             handler=handler, deserializer=deserializer, publisher=publisher
         )
-        self.subscriber: S = subscriber
-        """
-        Provides implementation of how to subscribe.
-        """
+        self.subscriber = subscriber
 
     def start_listening(self):
         return self.subscriber.subscribe(callback=self.run)
@@ -63,8 +65,8 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
 class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
     """
     Acknowledge-aware listener.
-    Defines `ListenerWithAck.ack()`.
-    Subclass ListenerWithAck and specify when to ack
+    Defines :meth:`ListenerWithAck.ack`.
+    Subclass :class:`ListenerWithAck` and specify when to ack
     by overriding the corresponding callbacks.
     """
 
@@ -107,7 +109,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
 
 class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
-    Acknowledge-aware listener,
+    Acknowledge-aware :class:`BaseListener`,
     which performs `ack` right after
     `on_received` callback is finished.
     """
