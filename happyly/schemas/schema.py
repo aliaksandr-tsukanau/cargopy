@@ -3,13 +3,14 @@ import marshmallow
 
 class Schema(marshmallow.Schema):
     """
-    Marshmallow schema, which raises errors on mismatch
+    :doc:`Marshmallow <marshmallow:index>` schema, which raises errors on mismatch
     (extra fields provided also raise exception).
 
-    Subclass it just like any marshmallow Schema to describe schema.
+    Subclass it just like any marshmallow :class:`~marshmallow.Schema`
+    to describe schema.
 
     Instantiation with no arguments is a good strict default,
-    but you can pass any arguments valid for `marshmallow.Schema`
+    but you can pass any arguments valid for :class:`marshmallow.Schema`
     """
 
     def __init__(self, *args, **kwargs):
