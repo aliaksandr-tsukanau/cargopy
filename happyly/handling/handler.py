@@ -18,7 +18,7 @@ class Handler(ABC):
         Applies logic using a provided message,
         optionally gives back one or more results.
         Each result consists of message attributes which can be serialized and sent.
-        When fails, calls `on_handling_failed`
+        When fails, calls :meth:`on_handling_failed`
 
         :param message: A parsed message as a dictionary of attributes
 
@@ -33,15 +33,20 @@ class Handler(ABC):
         self, message: Mapping[str, Any], error: Exception
     ) -> ZeroToManyParsedMessages:
         """
-        Applies fallback logic using a provided message when `handle` fails,
+        Applies fallback logic using a provided message
+        when :meth:`handle` fails,
         optionally gives back one or more results.
-        Enforces users of `Handler` class to provide explicit strategy for errors.
+        Enforces users of :class:`Handler` class
+        to provide explicit strategy for errors.
 
         If you want to propagate error further to the underlying Executor/Handler,
-        just raise an exception here.
+        just re-raise an `error` here::
+
+            def on_handling_failed(self, message, error):
+                raise error
 
         :param message: A parsed message as a dictionary of attributes
-        :param error: Error raised by `handle`
+        :param error: Error raised by :meth:`handle`
         :return: None if no result is extracted from handling,
             a dictionary of attributes for single result
             or a list of dictionaries if handling provides multiple results
