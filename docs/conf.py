@@ -87,10 +87,10 @@ version = '.'.join(release.split('.')[:2])
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx_autodoc_annotation',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',  # support Google-styled docstrings
+    'sphinx_autodoc_typehints',  # should be imported after napoleon
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
