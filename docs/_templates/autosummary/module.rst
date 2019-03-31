@@ -11,10 +11,9 @@
 
 .. autosummary::
    :toctree:
-
    {% for class in classes %}
    {{ class }}
-   {% endfor %}
+   {%- endfor %}
 {% endif %}
 
 {% if functions %}
@@ -22,8 +21,7 @@
 
 .. autosummary::
    :toctree:
-
    {% for function in functions %}
    {{ function }}
-   {% endfor %}
+   {%- endfor %}
 {% endif %}

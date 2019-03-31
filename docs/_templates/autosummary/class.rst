@@ -13,7 +13,7 @@
 
    .. autosummary::
    {% for item in all_attributes + methods %}
-      {% if item not in inherited_members and (item in ['__call__'] or not item.startswith('_')) %}
+      {%- if item not in inherited_members and (item in ['__call__'] or not item.startswith('_')) %}
       {{ item }}
-      {% endif %}
+      {%- endif %}
    {%- endfor %}
