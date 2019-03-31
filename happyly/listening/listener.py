@@ -71,7 +71,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
 class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
     """
     Acknowledge-aware listener.
-    Defines :meth:`ListenerWithAck.ack`.
+    Defines :meth:`ListenerWithAck.ack` method.
     Subclass :class:`ListenerWithAck` and specify when to ack
     by overriding the corresponding callbacks.
     """
@@ -117,8 +117,8 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
 class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
     Acknowledge-aware :class:`BaseListener`,
-    which performs `ack` right after
-    `on_received` callback is finished.
+    which performs :meth:`.ack` right after
+    :meth:`.on_received` callback is finished.
     """
 
     def _after_on_received(self, message: Optional[Any]):
@@ -129,7 +129,7 @@ class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
 class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
     Acknowledge-aware listener,
-    which performs `ack` at the very end of pipeline.
+    which performs :meth:`.ack` at the very end of pipeline.
     """
 
     def on_finished(self, original_message: Any, error: Optional[Exception]):
