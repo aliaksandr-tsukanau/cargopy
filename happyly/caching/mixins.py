@@ -9,14 +9,14 @@ class CacheByRequestIdMixin:
     """
     Mixin which adds caching functionality to Listener.
     Utilizes notions of listener's topic
-    and request id of message -
+    and request id of message --
     otherwise will not work.
 
     To be used via multiple inheritance.
-    For example, given some component SomeListener
+    For example, given some component `SomeListener`
     you can define its caching equivalent
-    by defining SomeCachedListener which inherits
-    from both SomeListener and CacheByRequestIdMixin.
+    by defining `SomeCachedListener` which inherits
+    from both `SomeListener` and :class:`.CacheByRequestIdMixin`.
     """
 
     def __init__(self, cacher: Cacher):
