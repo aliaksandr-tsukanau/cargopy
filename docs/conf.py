@@ -260,3 +260,42 @@ intersphinx_mapping = {
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+
+# Enhance sphinx_autodoc_typehints with support for class fields.
+# This implementation is somewhat dirty;
+# probably we should improve it and make a PR?
+# Problems: in particular, it will fail with `<locals>` in name.
+def process_docstring(app, what, name, obj, options, lines):
+    if what != 'attribute':
+        return
+
+    from importlib import import_module
+    from typing import get_type_hints
+
+    from sphinx_autodoc_typehints import format_annotation
+
+    *parts, attrname = name.split('.')
+    moduleparts = parts.copy()
+    while moduleparts:
+        try:
+            cls = import_module('.'.join(moduleparts))
+        except ImportError:
+            del moduleparts[-1]
+        else:
+            break
+    if not moduleparts:
+        print('XXX failed to import module')
+        return
+    innerparts = parts[len(moduleparts) :]
+    while innerparts:
+        cls = getattr(cls, innerparts.pop(0))
+    annotations = get_type_hints(cls)
+    if attrname in annotations:
+        lines.extend(
+            ['', '**Type**: {}'.format(format_annotation(annotations[attrname]))]
+        )
+
+
+def setup(app):
+    app.connect('autodoc-process-docstring', process_docstring)
