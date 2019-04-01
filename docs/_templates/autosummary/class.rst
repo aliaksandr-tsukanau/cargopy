@@ -1,3 +1,6 @@
+:github_url: hide
+:_comment: The above is a hack backed by our breadcrumbs.html template
+
 {{ fullname | escape | underline}}
 
 .. currentmodule:: {{ module }}
