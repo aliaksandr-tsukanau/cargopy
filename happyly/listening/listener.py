@@ -43,7 +43,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         self,
         subscriber: S,
         handler: Handler,
-        deserializer: Optional[D] = None,
+        deserializer: D,
         publisher: Optional[P] = None,
     ):
         assert handler is not DUMMY_HANDLER
@@ -72,7 +72,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         self,
         subscriber: SubscriberWithAck,
         handler: Handler,
-        deserializer: Optional[D] = None,
+        deserializer: D,
         publisher: Optional[P] = None,
     ):
         super().__init__(
