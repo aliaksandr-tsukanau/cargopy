@@ -1,8 +1,9 @@
-from typing import Union, Optional, Any
+from typing import Union, Optional
 
 import marshmallow
 
-from ..high_level.base import GoogleBaseReceiveAndReply, GoogleBaseReceiver
+from happyly._deprecations.utils import will_be_removed
+from .early_ack import GoogleEarlyAckReceiver, GoogleEarlyAckReceiveAndReply
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
@@ -36,17 +37,19 @@ class GoogleSimpleSender(
         )
 
 
-class GoogleSimpleReceiver(GoogleBaseReceiver):
-    def _after_on_received(self, message: Optional[Any]):
-        self.ack(message)
-        super()._after_on_received(message)
+class GoogleSimpleReceiver(GoogleEarlyAckReceiver):
+    def __init__(self, *args, **kwargs):
+        will_be_removed(GoogleEarlyAckReceiver, '0.8.0')
+        super().__init__(*args, **kwargs)
 
 
-class GoogleSimpleReceiveAndReply(GoogleBaseReceiveAndReply):
-    def _after_on_received(self, message: Optional[Any]):
-        self.ack(message)
-        super()._after_on_received(message)
+class GoogleSimpleReceiveAndReply(GoogleEarlyAckReceiveAndReply):
+    def __init__(self, *args, **kwargs):
+        will_be_removed(GoogleEarlyAckReceiveAndReply, '0.8.0')
+        super().__init__(*args, **kwargs)
 
 
-# for compatibility
-GoogleReceiveAndReplyComponent = GoogleSimpleReceiveAndReply
+class GoogleReceiveAndReplyComponent(GoogleEarlyAckReceiveAndReply):
+    def __init__(self, *args, **kwargs):
+        will_be_removed(GoogleEarlyAckReceiveAndReply, '0.8.0')
+        super().__init__(*args, **kwargs)
