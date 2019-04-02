@@ -1,3 +1,9 @@
+"""
+:class:`~happyly.listening.listener.BaseListener` and its subclasses.
+Listener is a form of Executor
+which is able to run pipeline by an event coming from a subscription.
+"""
+
 import logging
 from typing import Any, TypeVar, Optional, Generic
 
@@ -39,6 +45,11 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
     depending on concrete components provided to listener's constructor.
     """
 
+    subscriber: S
+    """
+    Provides implementation of how to subscribe.
+    """
+
     def __init__(
         self,
         subscriber: S,
@@ -51,10 +62,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         super().__init__(
             handler=handler, deserializer=deserializer, publisher=publisher
         )
-        self.subscriber: S = subscriber
-        """
-        Provides implementation of how to subscribe.
-        """
+        self.subscriber = subscriber
 
     def start_listening(self):
         return self.subscriber.subscribe(callback=self.run)
@@ -63,8 +71,8 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
 class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
     """
     Acknowledge-aware listener.
-    Defines `ListenerWithAck.ack()`.
-    Subclass ListenerWithAck and specify when to ack
+    Defines :meth:`ListenerWithAck.ack` method.
+    Subclass :class:`ListenerWithAck` and specify when to ack
     by overriding the corresponding callbacks.
     """
 
@@ -98,6 +106,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         """
         Acknowledge the message using implementation from subscriber,
         then log success.
+
         :param message:
             Message as it has been received, without any deserialization
         """
@@ -107,9 +116,9 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
 
 class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
-    Acknowledge-aware listener,
-    which performs `ack` right after
-    `on_received` callback is finished.
+    Acknowledge-aware :class:`BaseListener`,
+    which performs :meth:`.ack` right after
+    :meth:`.on_received` callback is finished.
     """
 
     def _after_on_received(self, message: Optional[Any]):
@@ -120,7 +129,7 @@ class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
 class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
     """
     Acknowledge-aware listener,
-    which performs `ack` at the very end of pipeline.
+    which performs :meth:`.ack` at the very end of pipeline.
     """
 
     def on_finished(self, original_message: Any, error: Optional[Exception]):
@@ -129,6 +138,12 @@ class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
 
 
 class Listener(EarlyAckListener[D, P], Generic[D, P]):
+    """
+    .. deprecated:: 0.6.0
+
+        use :class:`EarlyAckListener` instead.
+    """
+
     def __init__(self, *args, **kwargs):
         will_be_removed('Listener', EarlyAckListener, '0.7.0')
         super().__init__(*args, **kwargs)

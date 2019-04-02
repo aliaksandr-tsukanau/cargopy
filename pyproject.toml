@@ -31,12 +31,17 @@ redis = ["redis>=3.0"]
 dev = [
     "bump2version>=0.5.10",  # use bump2version while bumpversion project is inactive
     "pre-commit>=1.14.4",
+    "sphinx>=1.8.5",
+    "sphinx-rtd-theme>=0.4.3",
+    "sphinx-autodoc-typehints>=1.6.0",
 ]
 test = ["pytest>=4.3.0", "tox>=3.7.0"]
 
 [tool.flit.metadata.urls]
-Documentation = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
+# these links will be shown on pypi page for the project
+Documentation = "https://happyly.readthedocs.io/en/latest/"
+Tutorial = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
 
 [tool.black]
 line-length = 88
-py36 = true
+target-version = ["py36", "py37"]

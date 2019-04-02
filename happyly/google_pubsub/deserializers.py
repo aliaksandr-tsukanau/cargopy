@@ -21,7 +21,8 @@ class JSONDeserializerWithRequestIdRequired(Deserializer):
 
     If `JSONDeserializerWithRequestIdRequired`
     fails to deserialize some message,
-    it tries to fetch request id and provide error message.
+    you can use `build_error_result`
+    to fetch request id and provide error message.
     """
 
     schema: marshmallow.Schema

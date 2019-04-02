@@ -8,7 +8,7 @@ class Cacher(ABC):
     """
     Abstract base class
     which defines interface of any caching component
-    to be used via CacheByRequestIdMixin or similar mixin.
+    to be used via :class:`.CacheByRequestIdMixin` or similar mixin.
     """
 
     @abstractmethod

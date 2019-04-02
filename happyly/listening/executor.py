@@ -27,9 +27,9 @@ class Executor(Generic[D, P]):
 
     Executor does not implement stages themselves,
     it takes internal implementation of stages from corresponding components:
-    handler, deserializer, publisher.
+    :class:`Handler`, :class:`Deserializer`, :class:`Publisher`.
 
-    It means that executor is universal
+    It means that :class:`Executor` is universal
     and can work with any serialization/messaging technology
     depending on concrete components provided to executor's constructor.
     """
