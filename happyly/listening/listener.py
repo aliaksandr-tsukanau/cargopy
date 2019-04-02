@@ -130,5 +130,5 @@ class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
 
 class Listener(EarlyAckListener[D, P], Generic[D, P]):
     def __init__(self, *args, **kwargs):
-        will_be_removed(EarlyAckListener, '0.7.0')
+        will_be_removed('Listener', EarlyAckListener, '0.7.0')
         super().__init__(*args, **kwargs)
