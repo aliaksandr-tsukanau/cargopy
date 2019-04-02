@@ -2,7 +2,7 @@ from logging import Logger
 
 from attr import attrs
 
-from happyly.logs.base import BaseLogger
+from .base import BaseLogger
 
 
 @attrs(auto_attribs=True)
@@ -12,7 +12,7 @@ class RequestIdLogger(BaseLogger):
     request_id: str = ''
 
     def _fmt(self, message):
-        return f'{self.topic:35} | {self.request_id:40} |> {message}'
+        return f' {self.topic:>35} | {self.request_id:>40} |> {message}'
 
     def info(self, message: str):
         self.logger.info(self._fmt(message))

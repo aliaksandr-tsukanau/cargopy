@@ -54,7 +54,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         self,
         subscriber: S,
         handler: Handler,
-        deserializer: Optional[D] = None,
+        deserializer: D,
         publisher: Optional[P] = None,
     ):
         assert handler is not DUMMY_HANDLER
@@ -80,7 +80,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         self,
         subscriber: SubscriberWithAck,
         handler: Handler,
-        deserializer: Optional[D] = None,
+        deserializer: D,
         publisher: Optional[P] = None,
     ):
         super().__init__(
@@ -145,5 +145,5 @@ class Listener(EarlyAckListener[D, P], Generic[D, P]):
     """
 
     def __init__(self, *args, **kwargs):
-        will_be_removed(EarlyAckListener, '0.7.0')
+        will_be_removed('Listener', EarlyAckListener, '0.7.0')
         super().__init__(*args, **kwargs)

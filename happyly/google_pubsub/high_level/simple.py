@@ -39,17 +39,21 @@ class GoogleSimpleSender(
 
 class GoogleSimpleReceiver(GoogleEarlyAckReceiver):
     def __init__(self, *args, **kwargs):
-        will_be_removed(GoogleEarlyAckReceiver, '0.8.0')
+        will_be_removed('GoogleSimpleReceiver', GoogleEarlyAckReceiver, '0.8.0')
         super().__init__(*args, **kwargs)
 
 
 class GoogleSimpleReceiveAndReply(GoogleEarlyAckReceiveAndReply):
     def __init__(self, *args, **kwargs):
-        will_be_removed(GoogleEarlyAckReceiveAndReply, '0.8.0')
+        will_be_removed(
+            'GoogleSimpleReceiveAndReply', GoogleEarlyAckReceiveAndReply, '0.8.0'
+        )
         super().__init__(*args, **kwargs)
 
 
 class GoogleReceiveAndReplyComponent(GoogleEarlyAckReceiveAndReply):
     def __init__(self, *args, **kwargs):
-        will_be_removed(GoogleEarlyAckReceiveAndReply, '0.8.0')
+        will_be_removed(
+            'GoogleReceiveAndReplyComponent', GoogleEarlyAckReceiveAndReply, '0.8.0'
+        )
         super().__init__(*args, **kwargs)

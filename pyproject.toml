@@ -18,7 +18,7 @@ classifiers = [
 ]
 keywords = "google pubsub"
 requires = [
-    "attrs>=18.2",
+    "attrs>=19.1",
     "google-cloud-pubsub>=0.37.2",
     "marshmallow>=2.15,<3",
 ]

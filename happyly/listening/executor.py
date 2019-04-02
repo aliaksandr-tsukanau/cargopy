@@ -3,6 +3,7 @@ from typing import Mapping, Any, Optional, TypeVar, Generic
 
 from attr import attrs
 
+from happyly.exceptions import StopPipeline
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
@@ -181,22 +182,35 @@ class Executor(Generic[D, P]):
         Callback which is called when pipeline finishes its execution.
         Is guaranteed to be called unless pipeline is stopped via
         StopPipeline.
+
         :param original_message:
             Message as it has been received, without any deserialization
         :param error: exception object which was raised or None
         """
         _LOGGER.info('Pipeline execution finished.')
 
+    def on_stopped(self, original_message: Any, reason: str = ''):
+        """
+        Callback which is called when pipeline is stopped via
+        StopPipeline
+        :param original_message:
+            Message as it has been received, without any deserialization
+        :param reason: message describing why the pipeline stopped
+        """
+        s = "." if reason == "" else f" due to the reason: {reason}."
+        _LOGGER.info(f'Stopped pipeline{s}')
+
     def _when_parsing_succeeded(self, original: Any, parsed: Mapping[str, Any]):
         try:
             result = self.handler(parsed)
-            self.on_handled(
-                original_message=original, parsed_message=parsed, result=result
-            )
         except Exception as e:
             self.on_handling_failed(original, parsed, e)
             self.on_finished(original, e)
             return
+        else:
+            self.on_handled(
+                original_message=original, parsed_message=parsed, result=result
+            )
         if self.publisher is not None:
             self._try_publish(original, parsed, result)
         else:
@@ -225,15 +239,16 @@ class Executor(Generic[D, P]):
         assert self.publisher is not None
         try:
             self.publisher.publish_result(result)
-            self.on_published(
-                original_message=original, parsed_message=parsed, result=result
-            )
-            self.on_finished(original, error=None)
         except Exception as e:
             self.on_publishing_failed(
                 original_message=original, parsed_message=parsed, result=result, error=e
             )
             self.on_finished(original, error=e)
+        else:
+            self.on_published(
+                original_message=original, parsed_message=parsed, result=result
+            )
+            self.on_finished(original, error=None)
 
     def _after_on_received(self, message: Optional[Any]):
         assert self.deserializer is not None
@@ -250,17 +265,31 @@ class Executor(Generic[D, P]):
         """
         Method that starts execution of pipeline stages.
 
+        To stop the pipeline
+        raise StopPipeline inside any callback.
+
         :param message: Message as is, without deserialization.
             Or message attributes
             if the executor was instantiated with neither a deserializer nor a handler
             (useful to quickly publish message attributes by hand)
         """
-        self.on_received(message)
-        self._after_on_received(message)
+        try:
+            self.on_received(message)
+            self._after_on_received(message)
+        except StopPipeline as e:
+            self.on_stopped(original_message=message, reason=e.reason)
 
 
 if __name__ == '__main__':
 
+    class StoppingExecutor(Executor):
+        def on_deserialized(
+            self, original_message: Any, parsed_message: Mapping[str, Any]
+        ):
+            super().on_deserialized(original_message, parsed_message)
+            raise StopPipeline("the sky is very high")
+
     logging.basicConfig(level=logging.INFO)
 
+    StoppingExecutor(lambda m: HandlingResult.ok(42)).run()  # type: ignore
     Executor(lambda m: HandlingResult.ok(42)).run()  # type: ignore

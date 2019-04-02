@@ -3,7 +3,7 @@
 # flake8: noqa F401
 import logging
 
-__version__ = '0.5.1'
+__version__ = '0.6.0'
 
 
 from .listening import Executor, Listener, BaseListener
@@ -11,6 +11,7 @@ from .schemas import Schema
 from .caching import Cacher
 from .serialization import Serializer, Deserializer
 from .handling import Handler, DUMMY_HANDLER
+from .exceptions import StopPipeline
 
 
 def _welcome():

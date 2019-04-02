@@ -19,5 +19,5 @@ class SubscriberWithAck(BaseSubscriber, ABC):
 # for compatibility, to be deprecated
 class Subscriber(SubscriberWithAck, ABC):
     def __init__(self, *args, **kwargs):
-        will_be_removed(SubscriberWithAck, '0.7.0')
+        will_be_removed('Subscriber', SubscriberWithAck, '0.7.0')
         super().__init__(*args, **kwargs)

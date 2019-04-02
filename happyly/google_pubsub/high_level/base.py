@@ -33,7 +33,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
         self,
         subscriber: GooglePubSubSubscriber,
         handler: Handler,
-        deserializer: Optional[JSONDeserializerWithRequestIdRequired] = None,
+        deserializer: JSONDeserializerWithRequestIdRequired,
         publisher: Optional[GooglePubSubPublisher] = None,
         from_topic: str = '',
     ):
@@ -50,9 +50,8 @@ class _BaseGoogleListenerWithRequestIdLogger(
         logger.info(f"Received message: {_format_message(message)}")
 
     def on_deserialized(self, original_message: Any, parsed_message: Mapping[str, Any]):
-        request_id = ''
-        if self.deserializer is not None:
-            request_id = parsed_message[self.deserializer.request_id_field]
+        assert self.deserializer is not None
+        request_id = parsed_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.debug(
@@ -62,7 +61,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
     def on_deserialization_failed(self, message: Any, error: Exception):
         logger = RequestIdLogger(_LOGGER, self.from_topic)
         logger.exception(
-            f"Was not able to deserialize the following message\n"
+            f"Was not able to deserialize the following message: "
             f"{_format_message(message)}"
         )
 
@@ -72,11 +71,18 @@ class _BaseGoogleListenerWithRequestIdLogger(
         parsed_message: Mapping[str, Any],
         result: HandlingResult,
     ):
-        request_id = ''
-        if self.deserializer is not None:
-            request_id = parsed_message[self.deserializer.request_id_field]
+        assert self.deserializer is not None
+        request_id = parsed_message[self.deserializer.request_id_field]
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f"Message handled, status {result.status}")
+
+    def on_handling_failed(
+        self, original_message: Any, parsed_message: Mapping[str, Any], error: Exception
+    ):
+        assert self.deserializer is not None
+        request_id = parsed_message[self.deserializer.request_id_field]
+        logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
+        logger.info(f'Failed to handle message, error {error}')
 
     def on_published(
         self,
@@ -84,8 +90,9 @@ class _BaseGoogleListenerWithRequestIdLogger(
         parsed_message: Optional[Mapping[str, Any]],
         result: HandlingResult,
     ):
+        assert self.deserializer is not None
         request_id = ''
-        if parsed_message is not None and self.deserializer is not None:
+        if parsed_message is not None:
             request_id = parsed_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
@@ -98,12 +105,44 @@ class _BaseGoogleListenerWithRequestIdLogger(
         result: HandlingResult,
         error: Exception,
     ):
+        assert self.deserializer is not None
         request_id = ''
-        if parsed_message is not None and self.deserializer is not None:
+        if parsed_message is not None:
             request_id = parsed_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.exception(f"Failed to publish result: {result.data}")
+
+    def on_acknowledged(self, message: Any):
+        assert self.deserializer is not None
+        try:
+            msg: Mapping = self.deserializer.deserialize(message)
+            req_id = msg[self.deserializer.request_id_field]
+        except Exception:
+            req_id = ''
+        logger = RequestIdLogger(_LOGGER, self.from_topic, req_id)
+        logger.info('Message acknowledged.')
+
+    def on_finished(self, original_message: Any, error: Optional[Exception]):
+        assert self.deserializer is not None
+        try:
+            msg: Mapping = self.deserializer.deserialize(original_message)
+            req_id = msg[self.deserializer.request_id_field]
+        except Exception:
+            req_id = ''
+        logger = RequestIdLogger(_LOGGER, self.from_topic, req_id)
+        logger.info('Pipeline execution finished.')
+
+    def on_stopped(self, original_message: Any, reason: str = ''):
+        assert self.deserializer is not None
+        try:
+            msg: Mapping = self.deserializer.deserialize(original_message)
+            req_id = msg[self.deserializer.request_id_field]
+        except Exception:
+            req_id = ''
+        logger = RequestIdLogger(_LOGGER, self.from_topic, req_id)
+        s = "." if reason == "" else f" due to the reason: {reason}."
+        logger.info(f'Stopped pipeline{s}')
 
 
 class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
@@ -115,13 +154,15 @@ class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
         handler: Handler,
         from_topic: str = '',
     ):
-        self.from_topic = from_topic
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )
         deserializer = JSONDeserializerWithRequestIdRequired(schema=input_schema)
         super().__init__(
-            subscriber=subscriber, handler=handler, deserializer=deserializer
+            subscriber=subscriber,
+            handler=handler,
+            deserializer=deserializer,
+            from_topic=from_topic,
         )
 
 
@@ -136,7 +177,6 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
         project: str,
         from_topic: str = '',
     ):
-        self.from_topic = from_topic
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )
@@ -151,4 +191,5 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
             deserializer=deserializer,
             subscriber=subscriber,
             publisher=publisher,
+            from_topic=from_topic,
         )
