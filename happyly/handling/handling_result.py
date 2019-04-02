@@ -22,7 +22,7 @@ class HandlingResult:
     """
     data: ZeroToManyParsedMessages
     """
-    Message or messages which were processed.
+    Result or results of handling.
     """
 
     @classmethod

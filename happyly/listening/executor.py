@@ -179,8 +179,8 @@ class Executor(Generic[D, P]):
     def on_finished(self, original_message: Any, error: Optional[Exception]):
         """
         Callback which is called when pipeline finishes its execution.
-        Is guaranteed to be called, whether pipeline succeeds or not.
-
+        Is guaranteed to be called unless pipeline is stopped via
+        StopPipeline.
         :param original_message:
             Message as it has been received, without any deserialization
         :param error: exception object which was raised or None
