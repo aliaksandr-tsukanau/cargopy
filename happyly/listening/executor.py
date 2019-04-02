@@ -180,13 +180,25 @@ class Executor(Generic[D, P]):
     def on_finished(self, original_message: Any, error: Optional[Exception]):
         """
         Callback which is called when pipeline finishes its execution.
-        Is guaranteed to be called, whether pipeline succeeds or not.
+        Is guaranteed to be called unless pipeline is stopped via
+        StopPipeline.
 
         :param original_message:
             Message as it has been received, without any deserialization
         :param error: exception object which was raised or None
         """
         _LOGGER.info('Pipeline execution finished.')
+
+    def on_stopped(self, original_message: Any, reason: str = ''):
+        """
+        Callback which is called when pipeline is stopped via
+        StopPipeline
+        :param original_message:
+            Message as it has been received, without any deserialization
+        :param reason: message describing why the pipeline stopped
+        """
+        s = "." if reason == "" else f" due to the reason: {reason}."
+        _LOGGER.info(f'Stopped pipeline{s}')
 
     def _when_parsing_succeeded(self, original: Any, parsed: Mapping[str, Any]):
         try:
@@ -265,8 +277,7 @@ class Executor(Generic[D, P]):
             self.on_received(message)
             self._after_on_received(message)
         except StopPipeline as e:
-            s = "." if e.reason == "" else f" due to the reason: {e.reason}."
-            _LOGGER.info(f'Stopped pipeline{s}')
+            self.on_stopped(original_message=message, reason=e.reason)
 
 
 if __name__ == '__main__':

@@ -76,6 +76,14 @@ class _BaseGoogleListenerWithRequestIdLogger(
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f"Message handled, status {result.status}")
 
+    def on_handling_failed(
+        self, original_message: Any, parsed_message: Mapping[str, Any], error: Exception
+    ):
+        assert self.deserializer is not None
+        request_id = parsed_message[self.deserializer.request_id_field]
+        logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
+        logger.info(f'Failed to handle message, error {error}')
+
     def on_published(
         self,
         original_message: Any,
@@ -124,6 +132,17 @@ class _BaseGoogleListenerWithRequestIdLogger(
             req_id = ''
         logger = RequestIdLogger(_LOGGER, self.from_topic, req_id)
         logger.info('Pipeline execution finished.')
+
+    def on_stopped(self, original_message: Any, reason: str = ''):
+        assert self.deserializer is not None
+        try:
+            msg: Mapping = self.deserializer.deserialize(original_message)
+            req_id = msg[self.deserializer.request_id_field]
+        except Exception:
+            req_id = ''
+        logger = RequestIdLogger(_LOGGER, self.from_topic, req_id)
+        s = "." if reason == "" else f" due to the reason: {reason}."
+        logger.info(f'Stopped pipeline{s}')
 
 
 class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
