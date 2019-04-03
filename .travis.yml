@@ -1,8 +1,9 @@
 dist: xenial  # for py37
 language: python
 python:
-  - 3.7
   - 3.6
+  - 3.7
+  - 3.8-dev
 
 before_script: pip install flit && flit install --deps production --extras test
 script: py.test
