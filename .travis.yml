@@ -18,6 +18,7 @@ jobs:
         repo = equeumco/happyly \
         AND tag =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/ \
         AND env(FLIT_PASSWORD) IS present
+      env: FLIT_INDEX_URL=https://test.pypi.org/legacy/
       script: flit publish
       python: 3.7
 
