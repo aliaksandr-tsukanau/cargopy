@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Any, Optional, TypeVar, Generic
+from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple
 
 from attr import attrs
 
@@ -39,7 +39,7 @@ class Executor(Generic[D, P]):
     Provides implementation of handling stage to Executor.
     """
 
-    deserializer: Optional[D] = None
+    deserializer: D = DUMMY_SERDE  # type: ignore
     """
     Provides implementation of deserialization stage to Executor.
 
@@ -52,10 +52,6 @@ class Executor(Generic[D, P]):
 
     If not present, no publishing is performed.
     """
-
-    def __attrs_post_init__(self):
-        if self.deserializer is None:
-            self.deserializer = DUMMY_SERDE
 
     def on_received(self, message: Any):
         """
@@ -201,39 +197,6 @@ class Executor(Generic[D, P]):
         s = "." if reason == "" else f" due to the reason: {reason}."
         _LOGGER.info(f'Stopped pipeline{s}')
 
-    def _when_parsing_succeeded(self, original: Any, parsed: Mapping[str, Any]):
-        try:
-            result = self.handler(parsed)
-        except Exception as e:
-            self.on_handling_failed(original, parsed, e)
-            self.on_finished(original, e)
-            return
-        else:
-            self.on_handled(
-                original_message=original, parsed_message=parsed, result=result
-            )
-        if self.publisher is not None:
-            self._try_publish(original, parsed, result)
-        else:
-            self.on_finished(original_message=original, error=None)
-
-    def _when_parsing_failed(self, message: Any, error: Exception):
-        assert self.deserializer is not None
-
-        if self.publisher is None:
-            self.on_finished(original_message=message, error=error)
-            return
-        try:
-            result = self.deserializer.build_error_result(message, error)
-            handling_result = HandlingResult.err(result)
-        except Exception as new_err:
-            _LOGGER.exception(
-                "Deserialization failed and error result cannot be built."
-            )
-            self.on_finished(message, new_err)
-        else:
-            self._try_publish(original=message, parsed=None, result=handling_result)
-
     def _try_publish(
         self, original: Any, parsed: Optional[Mapping[str, Any]], result: HandlingResult
     ):
@@ -251,16 +214,65 @@ class Executor(Generic[D, P]):
             )
             self.on_finished(original, error=None)
 
-    def _after_on_received(self, message: Optional[Any]):
-        assert self.deserializer is not None
+    def _after_on_received(
+        self, message: Optional[Any]
+    ) -> Tuple[HandlingResult, Optional[Mapping[str, Any]]]:
         try:
-            parsed = self.deserializer.deserialize(message)
+            deserialized = self._deserialize(message)
+        except StopPipeline as e:
+            raise e from e
         except Exception as e:
-            self.on_deserialization_failed(message, error=e)
-            self._when_parsing_failed(message, error=e)
+            return self._build_error_result(message, e), None
+        return self._handle(message, deserialized), deserialized
+
+    def _deserialize(self, message: Optional[Any]):
+        try:
+            deserialized = self.deserializer.deserialize(message)
+        except Exception as e:
+            self.on_deserialization_failed(message=message, error=e)
+            raise e from e
         else:
-            self.on_deserialized(message, parsed)
-            self._when_parsing_succeeded(original=message, parsed=parsed)
+            self.on_deserialized(original_message=message, parsed_message=deserialized)
+            return deserialized
+
+    def _build_error_result(self, message: Any, error: Exception):
+        try:
+            error_result = self.deserializer.build_error_result(message, error)
+        except Exception as new_e:
+            _LOGGER.exception(
+                "Deserialization failed and error result cannot be built."
+            )
+            raise new_e from new_e
+        return HandlingResult.err(error_result)
+
+    def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
+        try:
+            result = self.handler(deserialized)
+        except Exception as e:
+            self.on_handling_failed(
+                original_message=message, parsed_message=deserialized, error=e
+            )
+            raise e from e
+        self.on_handled(
+            original_message=message, parsed_message=deserialized, result=result
+        )
+        return result
+
+    def _run_impl(
+        self, message: Optional[Any] = None
+    ) -> Tuple[Optional[HandlingResult], Optional[Mapping[str, Any]]]:
+        deserialized = None
+        try:
+            self.on_received(message)
+            result, deserialized = self._after_on_received(message)
+        except StopPipeline as e:
+            self.on_stopped(original_message=message, reason=e.reason)
+            return None, deserialized
+        except Exception as e:
+            self.on_finished(original_message=message, error=e)
+            return None, deserialized
+        else:
+            return result, deserialized
 
     def run(self, message: Optional[Any] = None):
         """
@@ -274,11 +286,19 @@ class Executor(Generic[D, P]):
             if the executor was instantiated with neither a deserializer nor a handler
             (useful to quickly publish message attributes by hand)
         """
+        result, deserialized = self._run_impl(message)
+        if result is None or self.publisher is None:
+            self.on_finished(original_message=message, error=None)
+            return
         try:
-            self.on_received(message)
-            self._after_on_received(message)
+            self._try_publish(message, deserialized, result)
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
+
+    def run_for_result(self, message: Optional[Any] = None):
+        result, _ = self._run_impl(message)
+        self.on_finished(original_message=message, error=None)
+        return result
 
 
 if __name__ == '__main__':

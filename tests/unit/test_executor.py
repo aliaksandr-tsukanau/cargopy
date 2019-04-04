@@ -34,7 +34,7 @@ def test_executor_no_input(
     assert executor.publisher is None
     executor.run()
     on_received.assert_called_with(None)
-    on_deserialized.assert_called_with(None, {})
+    on_deserialized.assert_called_with(original_message=None, parsed_message={})
     handler.assert_called_with({})
     on_handled.assert_called_with(
         original_message=None,
@@ -83,7 +83,9 @@ def test_executor_with_input(
     assert executor.publisher is None
     executor.run("original message")
     on_received.assert_called_with("original message")
-    on_deserialized.assert_called_with("original message", {'spam': 'eggs'})
+    on_deserialized.assert_called_with(
+        original_message="original message", parsed_message={'spam': 'eggs'}
+    )
     handler.assert_called_with({'spam': 'eggs'})
     on_handled.assert_called_with(
         original_message="original message",
