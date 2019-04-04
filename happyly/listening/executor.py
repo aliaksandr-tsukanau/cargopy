@@ -3,7 +3,7 @@ from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple
 
 from attr import attrs
 
-from happyly.exceptions import StopPipeline
+from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
@@ -14,11 +14,6 @@ _LOGGER = logging.getLogger(__name__)
 
 D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
-
-
-@attrs(auto_exc=True)
-class FetchedNoResult(Exception):
-    pass
 
 
 @attrs(auto_attribs=True)
