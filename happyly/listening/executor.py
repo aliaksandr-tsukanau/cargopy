@@ -192,7 +192,8 @@ class Executor(Generic[D, P]):
     def on_stopped(self, original_message: Any, reason: str = ''):
         """
         Callback which is called when pipeline is stopped via
-        StopPipeline
+        :exc:`.StopPipeline`
+
         :param original_message:
             Message as it has been received, without any deserialization
         :param reason: message describing why the pipeline stopped
