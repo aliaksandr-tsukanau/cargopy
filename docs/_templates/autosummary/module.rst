@@ -9,6 +9,16 @@
 
 .. currentmodule:: {{ fullname }}
 
+{% if exceptions %}
+.. rubric:: Exceptions
+
+.. autosummary::
+   :toctree:
+   {% for exc in exceptions %}
+   {{ exc }}
+   {%- endfor %}
+{% endif %}
+
 {% if classes %}
 .. rubric:: Classes
 
