@@ -4,7 +4,7 @@ from unittest.mock import patch
 from happyly import Deserializer
 from happyly.handling import HandlingResult, HandlingResultStatus
 from happyly.listening import Executor
-from happyly.serialization import DUMMY_DESERIALIZER
+from happyly.serialization import DUMMY_SERDE
 from tests.unit.test_handler import TestHandler
 
 
@@ -15,7 +15,10 @@ from tests.unit.test_handler import TestHandler
 @patch('test_executor.Executor.on_published')
 @patch('test_executor.Executor.on_publishing_failed')
 @patch('test_executor.Executor.on_finished')
-@patch('test_executor.TestHandler.__call__', return_value=HandlingResult.ok(42))
+@patch(
+    'test_executor.TestHandler.__call__',
+    return_value=HandlingResult.ok(42),  # type: ignore
+)
 def test_executor_no_input(
     handler,
     on_finished,
@@ -27,7 +30,7 @@ def test_executor_no_input(
     on_received,
 ):
     executor = Executor(handler=TestHandler())
-    assert executor.deserializer is DUMMY_DESERIALIZER
+    assert executor.deserializer is DUMMY_SERDE
     assert executor.publisher is None
     executor.run()
     on_received.assert_called_with(None)
@@ -36,7 +39,7 @@ def test_executor_no_input(
     on_handled.assert_called_with(
         original_message=None,
         parsed_message={},
-        result=HandlingResult(HandlingResultStatus.OK, data=42),
+        result=HandlingResult(HandlingResultStatus.OK, data=42),  # type: ignore
     )
     on_published.assert_not_called()
     on_publishing_failed.assert_not_called()
@@ -51,7 +54,10 @@ def test_executor_no_input(
 @patch('test_executor.Executor.on_published')
 @patch('test_executor.Executor.on_publishing_failed')
 @patch('test_executor.Executor.on_finished')
-@patch('test_executor.TestHandler.__call__', return_value=HandlingResult.ok(42))
+@patch(
+    'test_executor.TestHandler.__call__',
+    return_value=HandlingResult.ok(42),  # type: ignore
+)
 def test_executor_with_input(
     handler,
     on_finished,

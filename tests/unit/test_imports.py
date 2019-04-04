@@ -11,7 +11,7 @@ def test_imports():
     from happyly import (
         Handler,
         Executor,
-        Listener,
+        BaseListener,
         Serializer,
         Deserializer,
         Schema,
@@ -20,8 +20,14 @@ def test_imports():
     )
 
     from happyly.handling import Handler, HandlingResult, HandlingResultStatus
-    from happyly.listening import Executor, Listener
-    from happyly.pubsub import Publisher, Subscriber
+    from happyly.listening import (
+        Executor,
+        BaseListener,
+        LateAckListener,
+        EarlyAckListener,
+        ListenerWithAck,
+    )
+    from happyly.pubsub import Publisher, BaseSubscriber, SubscriberWithAck
     from happyly.serialization import Deserializer, Serializer
 
     from happyly.google_pubsub import (
