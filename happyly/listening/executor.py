@@ -16,6 +16,11 @@ D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
 
 
+@attrs(auto_exc=True)
+class FetchedNoResult(Exception):
+    pass
+
+
 @attrs(auto_attribs=True)
 class Executor(Generic[D, P]):
     """
@@ -298,7 +303,9 @@ class Executor(Generic[D, P]):
     def run_for_result(self, message: Optional[Any] = None):
         result, _ = self._run_impl(message)
         self.on_finished(original_message=message, error=None)
-        return result
+        if result is None:
+            raise FetchedNoResult
+        return result.data
 
 
 if __name__ == '__main__':
@@ -313,4 +320,4 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
     StoppingExecutor(lambda m: HandlingResult.ok(42)).run()  # type: ignore
-    Executor(lambda m: HandlingResult.ok(42)).run()  # type: ignore
+    print(Executor(lambda m: HandlingResult.ok(42)).run_for_result())  # type: ignore
