@@ -8,7 +8,6 @@ import logging
 from typing import Any, TypeVar, Optional, Generic
 
 from happyly.handling import Handler
-from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.pubsub import Publisher
 from happyly.pubsub.subscriber import BaseSubscriber, SubscriberWithAck
 from happyly.serialization import Deserializer
@@ -56,8 +55,6 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         deserializer: D,
         publisher: Optional[P] = None,
     ):
-        assert handler is not DUMMY_HANDLER
-
         super().__init__(
             handler=handler, deserializer=deserializer, publisher=publisher
         )
