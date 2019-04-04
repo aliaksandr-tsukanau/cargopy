@@ -7,6 +7,8 @@ which is able to run pipeline by an event coming from a subscription.
 import logging
 from typing import Any, TypeVar, Optional, Generic
 
+from happyly.serialization.serializer import Serializer
+from happyly.serialization.dummy import DUMMY_SERDE
 from happyly.handling import Handler
 from happyly.pubsub import Publisher
 from happyly.pubsub.subscriber import BaseSubscriber, SubscriberWithAck
@@ -20,9 +22,10 @@ _LOGGER = logging.getLogger(__name__)
 D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
 S = TypeVar("S", bound=BaseSubscriber)
+SE = TypeVar("SE", bound=Serializer)
 
 
-class BaseListener(Executor[D, P], Generic[D, P, S]):
+class BaseListener(Executor[D, P, SE], Generic[D, P, SE, S]):
     """
     Listener is a form of Executor
     which is able to run pipeline by an event coming from a subscription.
@@ -48,15 +51,19 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
     Provides implementation of how to subscribe.
     """
 
-    def __init__(
+    def __init__(  # type: ignore
         self,
         subscriber: S,
         handler: Handler,
         deserializer: D,
+        serializer: SE = DUMMY_SERDE,  # type: ignore
         publisher: Optional[P] = None,
     ):
         super().__init__(
-            handler=handler, deserializer=deserializer, publisher=publisher
+            handler=handler,
+            deserializer=deserializer,
+            publisher=publisher,
+            serializer=serializer,
         )
         self.subscriber = subscriber
 
@@ -64,7 +71,7 @@ class BaseListener(Executor[D, P], Generic[D, P, S]):
         return self.subscriber.subscribe(callback=self.run)
 
 
-class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
+class ListenerWithAck(BaseListener[D, P, SE, SubscriberWithAck], Generic[D, P, SE]):
     """
     Acknowledge-aware listener.
     Defines :meth:`ListenerWithAck.ack` method.
@@ -72,16 +79,18 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
     by overriding the corresponding callbacks.
     """
 
-    def __init__(
+    def __init__(  # type: ignore
         self,
         subscriber: SubscriberWithAck,
         handler: Handler,
         deserializer: D,
+        serializer: SE = DUMMY_SERDE,
         publisher: Optional[P] = None,
     ):
         super().__init__(
             handler=handler,
             deserializer=deserializer,
+            serializer=serializer,
             publisher=publisher,
             subscriber=subscriber,
         )
@@ -110,7 +119,7 @@ class ListenerWithAck(BaseListener[D, P, SubscriberWithAck], Generic[D, P]):
         self.on_acknowledged(message)
 
 
-class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
+class EarlyAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
     """
     Acknowledge-aware :class:`BaseListener`,
     which performs :meth:`.ack` right after
@@ -122,7 +131,7 @@ class EarlyAckListener(ListenerWithAck[D, P], Generic[D, P]):
         super()._after_on_received(message)
 
 
-class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
+class LateAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
     """
     Acknowledge-aware listener,
     which performs :meth:`.ack` at the very end of pipeline.
