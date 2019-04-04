@@ -1,6 +1,9 @@
 import warnings
 from typing import Any, Mapping
 
+import marshmallow
+from attr import attrs
+
 from happyly.serialization import Serializer
 from .deserializer import Deserializer
 
@@ -33,3 +36,22 @@ class DummySerde(Deserializer, Serializer):
 
 DUMMY_DESERIALIZER: DummySerde = DummySerde()
 DUMMY_SERDE: DummySerde = DummySerde()
+
+
+@attrs(auto_attribs=True, frozen=True)
+class DummyValidator(Deserializer, Serializer):
+
+    schema: marshmallow.Schema
+
+    def _validate(self, message):
+        errors = self.schema.validate(message)
+        if errors != {}:
+            raise marshmallow.ValidationError(str(errors))
+
+    def deserialize(self, message: Any) -> Mapping[str, Any]:
+        self._validate(message)
+        return message
+
+    def serialize(self, message_attributes: Mapping[str, Any]) -> Any:
+        self._validate(message_attributes)
+        return message_attributes
