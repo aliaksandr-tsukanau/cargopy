@@ -14,4 +14,4 @@ API Reference
    happyly.handling.handler
    happyly.handling.handling_result
    happyly.handling.dummy_handler._DummyHandler
-   happyly.exceptions.stop_pipeline
+   happyly.exceptions
