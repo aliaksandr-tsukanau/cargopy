@@ -8,7 +8,7 @@ from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
 from happyly.pubsub import Publisher
-from happyly.serialization import DUMMY_DESERIALIZER
+from happyly.serialization import DUMMY_SERDE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class Executor(Generic[D, P]):
 
     def __attrs_post_init__(self):
         if self.deserializer is None:
-            self.deserializer = DUMMY_DESERIALIZER
+            self.deserializer = DUMMY_SERDE
 
     def on_received(self, message: Any):
         """

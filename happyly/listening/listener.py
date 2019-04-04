@@ -7,7 +7,6 @@ which is able to run pipeline by an event coming from a subscription.
 import logging
 from typing import Any, TypeVar, Optional, Generic
 
-from happyly._deprecations.utils import will_be_removed
 from happyly.handling import Handler
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.pubsub import Publisher
@@ -135,15 +134,3 @@ class LateAckListener(ListenerWithAck[D, P], Generic[D, P]):
     def on_finished(self, original_message: Any, error: Optional[Exception]):
         self.ack(original_message)
         super().on_finished(original_message, error)
-
-
-class Listener(EarlyAckListener[D, P], Generic[D, P]):
-    """
-    .. deprecated:: 0.6.0
-
-        use :class:`EarlyAckListener` instead.
-    """
-
-    def __init__(self, *args, **kwargs):
-        will_be_removed('Listener', EarlyAckListener, '0.7.0')
-        super().__init__(*args, **kwargs)

@@ -6,7 +6,7 @@ import logging
 __version__ = '0.6.0'
 
 
-from .listening import Executor, Listener, BaseListener
+from .listening import Executor, BaseListener
 from .schemas import Schema
 from .caching import Cacher
 from .serialization import Serializer, Deserializer
