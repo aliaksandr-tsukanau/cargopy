@@ -1,8 +1,10 @@
 import logging
-from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple, List
+from collections import namedtuple
+from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple
 
 from attr import attrs
 
+from happyly import serialization
 from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
@@ -16,6 +18,9 @@ _LOGGER = logging.getLogger(__name__)
 D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
 SE = TypeVar("SE", bound=Serializer)
+
+
+ResultAndDeserialized = namedtuple('ResultAndDeserialized', 'result deserialized')
 
 
 @attrs(auto_attribs=True)
@@ -138,8 +143,8 @@ class Executor(Generic[D, P, SE]):
     def on_serialized(
         self,
         original: Any,
-        deserialized: Mapping[str, Any],
-        result: Optional[HandlingResult],
+        deserialized: Optional[Mapping[str, Any]],
+        result: HandlingResult,
         serialized: Any,
     ):
         _LOGGER.debug('Serialized message.')
@@ -147,8 +152,8 @@ class Executor(Generic[D, P, SE]):
     def on_serialization_failed(
         self,
         original: Any,
-        deserialized: Mapping[str, Any],
-        result: Optional[HandlingResult],
+        deserialized: Optional[Mapping[str, Any]],
+        result: HandlingResult,
         error: Exception,
     ):
         _LOGGER.exception('Was not able to deserialize message.')
@@ -236,16 +241,20 @@ class Executor(Generic[D, P, SE]):
             )
             self.on_finished(original, error=None)
 
-    def _after_on_received(
-        self, message: Optional[Any]
-    ) -> Tuple[HandlingResult, Optional[Mapping[str, Any]]]:
+    def _after_on_received(self, message: Optional[Any]) -> ResultAndDeserialized:
         try:
             deserialized = self._deserialize(message)
         except StopPipeline as e:
             raise e from e
         except Exception as e:
-            return self._build_error_result(message, e), None
-        return self._handle(message, deserialized), deserialized
+            retval = ResultAndDeserialized(
+                result=self._build_error_result(message, e), deserialized=None
+            )
+            return retval
+        retval = ResultAndDeserialized(
+            result=self._handle(message, deserialized), deserialized=deserialized
+        )
+        return retval
 
     def _deserialize(self, message: Optional[Any]):
         try:
@@ -283,19 +292,14 @@ class Executor(Generic[D, P, SE]):
     def _serialize(
         self,
         original_message: Optional[Any],
-        parsed_message: Mapping[str, Any],
+        parsed_message: Optional[Mapping[str, Any]],
         result: HandlingResult,
     ) -> Any:
+
         try:
-            d = result.data
-            if d is None:
-                serialized = None
-            elif isinstance(d, Mapping):
-                serialized = self.serializer.serialize(d)
-            elif isinstance(d, List):
-                serialized = [self.serializer.serialize(x) for x in d]
-            else:
-                raise TypeError('Invalid data structure')
+            serialized = serialization.utils.serialize_with_dispatching(
+                self.serializer, result.data
+            )
         except Exception as e:
             self.on_serialization_failed(
                 original=original_message,
@@ -320,7 +324,7 @@ class Executor(Generic[D, P, SE]):
         try:
             self.on_received(message)
             result, deserialized = self._after_on_received(message)
-            if result is not None and deserialized is not None:
+            if result is not None:
                 serialized = self._serialize(message, deserialized, result)
             else:
                 serialized = None
@@ -371,7 +375,7 @@ if __name__ == '__main__':
             super().on_deserialized(original_message, parsed_message)
             raise StopPipeline("the sky is very high")
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     StoppingExecutor(lambda m: HandlingResult.ok(42)).run()  # type: ignore
     print(
