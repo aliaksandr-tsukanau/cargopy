@@ -7,9 +7,12 @@ python:
 
 install:
   - pip install flit
-  - flit install --deps production --extras test
-script: py.test
-#script: tox  # This will test against all supported architectures
+  - flit install --deps production --extras test,dev
+script:
+  # make sure pre-commit hooks are not broken
+  - pre-commit run --all-files
+  # and run tests
+  - py.test
 
 jobs:
   include:

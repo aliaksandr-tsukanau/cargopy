@@ -1,10 +1,22 @@
+import warnings
 from typing import Any, Mapping
 
+import marshmallow
+from attr import attrs
+
+from happyly.serialization import Serializer
 from .deserializer import Deserializer
 
 
-class DummyDeserializer(Deserializer):
-    def deserialize(self, message) -> Mapping[str, Any]:
+class DummySerde(Deserializer, Serializer):
+    def _identity_transform(self, message):
+        if self is DUMMY_DESERIALIZER:
+            warnings.warn(
+                "Please use DUMMY_SERDE instead, "
+                "DUMMY_DESERIALIZER will be removed in happyly v0.9.0.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if isinstance(message, Mapping):
             return message
         elif message is None:
@@ -15,8 +27,31 @@ class DummyDeserializer(Deserializer):
                 'in form of dict-like structure as input'
             )
 
-    def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
-        raise error
+    def serialize(self, message_attributes: Mapping[str, Any]) -> Any:
+        return self._identity_transform(message_attributes)
+
+    def deserialize(self, message) -> Mapping[str, Any]:
+        return self._identity_transform(message)
 
 
-DUMMY_DESERIALIZER: DummyDeserializer = DummyDeserializer()
+DUMMY_DESERIALIZER: DummySerde = DummySerde()
+DUMMY_SERDE: DummySerde = DummySerde()
+
+
+@attrs(auto_attribs=True, frozen=True)
+class DummyValidator(Deserializer, Serializer):
+
+    schema: marshmallow.Schema
+
+    def _validate(self, message):
+        errors = self.schema.validate(message)
+        if errors != {}:
+            raise marshmallow.ValidationError(str(errors))
+
+    def deserialize(self, message: Any) -> Mapping[str, Any]:
+        self._validate(message)
+        return message
+
+    def serialize(self, message_attributes: Mapping[str, Any]) -> Any:
+        self._validate(message_attributes)
+        return message_attributes

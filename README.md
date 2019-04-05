@@ -1,5 +1,6 @@
 [![Happyly on PyPI](https://img.shields.io/pypi/v/happyly.svg)](https://pypi.python.org/pypi/happyly)
 [![Python version](https://img.shields.io/pypi/pyversions/happyly.svg)](https://pypi.python.org/pypi/happyly)
+[![Build Status](https://travis-ci.com/equeumco/happyly.svg?branch=master)](https://travis-ci.com/equeumco/happyly)
 
 # Description
 Happyly helps to build an extensible codebase when you are using Google Pub/Sub - and potentially any similar technology.
@@ -54,3 +55,9 @@ then you can use either of these methods:
 2. Recommended approach: `bumpversion --no-tag patch && bumpversion rel`.
 This will create an intermediary commit for `rc` but won't create a tag for it
 and hence won't trigger deployment for intermediary `rc1` version.
+
+# License
+
+The code of this repository is licensed under [MIT License](LICENSE),
+while images and documentation material are licensed under
+[Creative Commons BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).

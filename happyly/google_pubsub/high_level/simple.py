@@ -3,6 +3,7 @@ from typing import Union, Optional
 import marshmallow
 
 from happyly._deprecations.utils import will_be_removed
+from happyly.serialization.dummy import DummySerde
 from .early_ack import GoogleEarlyAckReceiver, GoogleEarlyAckReceiveAndReply
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from ..deserializers import JSONDeserializerWithRequestIdRequired
@@ -13,7 +14,11 @@ from happyly.listening.executor import Executor
 
 
 class GoogleSimpleSender(
-    Executor[Union[None, JSONDeserializerWithRequestIdRequired], GooglePubSubPublisher]
+    Executor[
+        Union[None, JSONDeserializerWithRequestIdRequired],
+        GooglePubSubPublisher,
+        DummySerde,
+    ]
 ):
     def __init__(
         self,

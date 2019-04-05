@@ -10,6 +10,5 @@ class Deserializer(ABC):
     def deserialize(self, message: Any) -> Mapping[str, Any]:
         raise _not_impl
 
-    @abstractmethod
     def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
-        raise _not_impl
+        raise error from error

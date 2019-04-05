@@ -9,3 +9,8 @@ class StopPipeline(Exception):
     """
 
     reason: str = ''
+
+
+@attrs(auto_exc=True)  # type: ignore
+class FetchedNoResult(Exception):
+    pass

@@ -1,23 +1,30 @@
 import logging
-from typing import Mapping, Any, Optional, TypeVar, Generic
+from collections import namedtuple
+from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple
 
 from attr import attrs
 
-from happyly.exceptions import StopPipeline
+from happyly import serialization
+from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler, HandlingResult
 from happyly.serialization.deserializer import Deserializer
+from happyly.serialization.serializer import Serializer
 from happyly.pubsub import Publisher
-from happyly.serialization import DUMMY_DESERIALIZER
+from happyly.serialization import DUMMY_SERDE
 
 _LOGGER = logging.getLogger(__name__)
 
 D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=Publisher)
+SE = TypeVar("SE", bound=Serializer)
+
+
+ResultAndDeserialized = namedtuple('ResultAndDeserialized', 'result deserialized')
 
 
 @attrs(auto_attribs=True)
-class Executor(Generic[D, P]):
+class Executor(Generic[D, P, SE]):
     """
     Component which is able to run handler as a part of more complex pipeline.
 
@@ -39,7 +46,7 @@ class Executor(Generic[D, P]):
     Provides implementation of handling stage to Executor.
     """
 
-    deserializer: Optional[D] = None
+    deserializer: D = DUMMY_SERDE  # type: ignore
     """
     Provides implementation of deserialization stage to Executor.
 
@@ -53,9 +60,7 @@ class Executor(Generic[D, P]):
     If not present, no publishing is performed.
     """
 
-    def __attrs_post_init__(self):
-        if self.deserializer is None:
-            self.deserializer = DUMMY_DESERIALIZER
+    serializer: SE = DUMMY_SERDE  # type: ignore
 
     def on_received(self, message: Any):
         """
@@ -135,6 +140,24 @@ class Executor(Generic[D, P]):
         """
         _LOGGER.exception(f'Handler raised an exception.')
 
+    def on_serialized(
+        self,
+        original: Any,
+        deserialized: Optional[Mapping[str, Any]],
+        result: HandlingResult,
+        serialized: Any,
+    ):
+        _LOGGER.debug('Serialized message.')
+
+    def on_serialization_failed(
+        self,
+        original: Any,
+        deserialized: Optional[Mapping[str, Any]],
+        result: HandlingResult,
+        error: Exception,
+    ):
+        _LOGGER.exception('Was not able to deserialize message.')
+
     def on_published(
         self,
         original_message: Any,
@@ -201,39 +224,6 @@ class Executor(Generic[D, P]):
         s = "." if reason == "" else f" due to the reason: {reason}."
         _LOGGER.info(f'Stopped pipeline{s}')
 
-    def _when_parsing_succeeded(self, original: Any, parsed: Mapping[str, Any]):
-        try:
-            result = self.handler(parsed)
-        except Exception as e:
-            self.on_handling_failed(original, parsed, e)
-            self.on_finished(original, e)
-            return
-        else:
-            self.on_handled(
-                original_message=original, parsed_message=parsed, result=result
-            )
-        if self.publisher is not None:
-            self._try_publish(original, parsed, result)
-        else:
-            self.on_finished(original_message=original, error=None)
-
-    def _when_parsing_failed(self, message: Any, error: Exception):
-        assert self.deserializer is not None
-
-        if self.publisher is None:
-            self.on_finished(original_message=message, error=error)
-            return
-        try:
-            result = self.deserializer.build_error_result(message, error)
-            handling_result = HandlingResult.err(result)
-        except Exception as new_err:
-            _LOGGER.exception(
-                "Deserialization failed and error result cannot be built."
-            )
-            self.on_finished(message, new_err)
-        else:
-            self._try_publish(original=message, parsed=None, result=handling_result)
-
     def _try_publish(
         self, original: Any, parsed: Optional[Mapping[str, Any]], result: HandlingResult
     ):
@@ -244,23 +234,100 @@ class Executor(Generic[D, P]):
             self.on_publishing_failed(
                 original_message=original, parsed_message=parsed, result=result, error=e
             )
-            self.on_finished(original, error=e)
+            raise e from e
         else:
             self.on_published(
                 original_message=original, parsed_message=parsed, result=result
             )
-            self.on_finished(original, error=None)
 
-    def _after_on_received(self, message: Optional[Any]):
-        assert self.deserializer is not None
+    def _fetch_deserialized_and_result(
+        self, message: Optional[Any]
+    ) -> ResultAndDeserialized:
         try:
-            parsed = self.deserializer.deserialize(message)
+            deserialized = self._deserialize(message)
+        except StopPipeline as e:
+            raise e from e
         except Exception as e:
-            self.on_deserialization_failed(message, error=e)
-            self._when_parsing_failed(message, error=e)
+            retval = ResultAndDeserialized(
+                result=self._build_error_result(message, e), deserialized=None
+            )
+            return retval
+        retval = ResultAndDeserialized(
+            result=self._handle(message, deserialized), deserialized=deserialized
+        )
+        return retval
+
+    def _deserialize(self, message: Optional[Any]):
+        try:
+            deserialized = self.deserializer.deserialize(message)
+        except Exception as e:
+            self.on_deserialization_failed(message=message, error=e)
+            raise e from e
         else:
-            self.on_deserialized(message, parsed)
-            self._when_parsing_succeeded(original=message, parsed=parsed)
+            self.on_deserialized(original_message=message, parsed_message=deserialized)
+            return deserialized
+
+    def _build_error_result(self, message: Any, error: Exception):
+        try:
+            error_result = self.deserializer.build_error_result(message, error)
+        except Exception as new_e:
+            _LOGGER.exception(
+                "Deserialization failed and error result cannot be built."
+            )
+            raise new_e from new_e
+        return HandlingResult.err(error_result)
+
+    def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
+        try:
+            result = self.handler(deserialized)
+        except Exception as e:
+            self.on_handling_failed(
+                original_message=message, parsed_message=deserialized, error=e
+            )
+            raise e from e
+        self.on_handled(
+            original_message=message, parsed_message=deserialized, result=result
+        )
+        return result
+
+    def _serialize(
+        self,
+        original_message: Optional[Any],
+        parsed_message: Optional[Mapping[str, Any]],
+        result: HandlingResult,
+    ) -> Any:
+
+        try:
+            serialized = serialization.utils.serialize_with_dispatching(
+                self.serializer, result.data
+            )
+        except Exception as e:
+            self.on_serialization_failed(
+                original=original_message,
+                deserialized=parsed_message,
+                result=result,
+                error=e,
+            )
+        else:
+            self.on_serialized(
+                original=original_message,
+                deserialized=parsed_message,
+                result=result,
+                serialized=serialized,
+            )
+            return serialized
+
+    def _run_core(
+        self, message: Optional[Any] = None
+    ) -> Tuple[Optional[Mapping[str, Any]], Optional[HandlingResult], Optional[Any]]:
+
+        self.on_received(message)
+        result, deserialized = self._fetch_deserialized_and_result(message)
+        if result is not None:
+            serialized = self._serialize(message, deserialized, result)
+        else:
+            serialized = None
+        return deserialized, result, serialized
 
     def run(self, message: Optional[Any] = None):
         """
@@ -275,10 +342,32 @@ class Executor(Generic[D, P]):
             (useful to quickly publish message attributes by hand)
         """
         try:
-            self.on_received(message)
-            self._after_on_received(message)
+            deserialized, result, serialized = self._run_core(message)
+            if self.publisher is not None and serialized is not None:
+                assert (
+                    result is not None
+                )  # something is serialized, so there must be a result
+                self.on_finished(original_message=message, error=None)
+                self._try_publish(message, deserialized, result)
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
+        except Exception as e:
+            self.on_finished(original_message=message, error=e)
+        else:
+            self.on_finished(original_message=message, error=None)
+
+    def run_for_result(self, message: Optional[Any] = None):
+        try:
+            _, _, serialized = self._run_core(message)
+        except StopPipeline as e:
+            self.on_stopped(original_message=message, reason=e.reason)
+            raise FetchedNoResult from e
+        except Exception as e:
+            self.on_finished(original_message=message, error=e)
+            raise FetchedNoResult from e
+        else:
+            self.on_finished(original_message=message, error=None)
+            return serialized
 
 
 if __name__ == '__main__':
@@ -290,7 +379,11 @@ if __name__ == '__main__':
             super().on_deserialized(original_message, parsed_message)
             raise StopPipeline("the sky is very high")
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     StoppingExecutor(lambda m: HandlingResult.ok(42)).run()  # type: ignore
-    Executor(lambda m: HandlingResult.ok(42)).run()  # type: ignore
+    print(
+        Executor(  # type: ignore
+            lambda m: HandlingResult.ok({"spam": "eggs"})
+        ).run_for_result()
+    )
