@@ -234,14 +234,15 @@ class Executor(Generic[D, P, SE]):
             self.on_publishing_failed(
                 original_message=original, parsed_message=parsed, result=result, error=e
             )
-            self.on_finished(original, error=e)
+            raise e from e
         else:
             self.on_published(
                 original_message=original, parsed_message=parsed, result=result
             )
-            self.on_finished(original, error=None)
 
-    def _after_on_received(self, message: Optional[Any]) -> ResultAndDeserialized:
+    def _fetch_deserialized_and_result(
+        self, message: Optional[Any]
+    ) -> ResultAndDeserialized:
         try:
             deserialized = self._deserialize(message)
         except StopPipeline as e:
@@ -316,26 +317,17 @@ class Executor(Generic[D, P, SE]):
             )
             return serialized
 
-    def _run_impl(
+    def _run_core(
         self, message: Optional[Any] = None
     ) -> Tuple[Optional[Mapping[str, Any]], Optional[HandlingResult], Optional[Any]]:
-        deserialized = None
-        serialized = None
-        try:
-            self.on_received(message)
-            result, deserialized = self._after_on_received(message)
-            if result is not None:
-                serialized = self._serialize(message, deserialized, result)
-            else:
-                serialized = None
-        except StopPipeline as e:
-            self.on_stopped(original_message=message, reason=e.reason)
-            return deserialized, None, serialized
-        except Exception as e:
-            self.on_finished(original_message=message, error=e)
-            raise e from e
+
+        self.on_received(message)
+        result, deserialized = self._fetch_deserialized_and_result(message)
+        if result is not None:
+            serialized = self._serialize(message, deserialized, result)
         else:
-            return deserialized, result, serialized
+            serialized = None
+        return deserialized, result, serialized
 
     def run(self, message: Optional[Any] = None):
         """
@@ -350,26 +342,32 @@ class Executor(Generic[D, P, SE]):
             (useful to quickly publish message attributes by hand)
         """
         try:
-            deserialized, result, serialized = self._run_impl(message)
-        except Exception:
-            return
-        if serialized is None or result is None or self.publisher is None:
-            self.on_finished(original_message=message, error=None)
-            return
-        try:
-            self._try_publish(message, deserialized, result)
+            deserialized, result, serialized = self._run_core(message)
+            if self.publisher is not None and serialized is not None:
+                assert (
+                    result is not None
+                )  # something is serialized, so there must be a result
+                self.on_finished(original_message=message, error=None)
+                self._try_publish(message, deserialized, result)
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
+        except Exception as e:
+            self.on_finished(original_message=message, error=e)
+        else:
+            self.on_finished(original_message=message, error=None)
 
     def run_for_result(self, message: Optional[Any] = None):
         try:
-            _, _, serialized = self._run_impl(message)
-        except Exception as e:
+            _, _, serialized = self._run_core(message)
+        except StopPipeline as e:
+            self.on_stopped(original_message=message, reason=e.reason)
             raise FetchedNoResult from e
-        self.on_finished(original_message=message, error=None)
-        if serialized is None:
-            raise FetchedNoResult
-        return serialized
+        except Exception as e:
+            self.on_finished(original_message=message, error=e)
+            raise FetchedNoResult from e
+        else:
+            self.on_finished(original_message=message, error=None)
+            return serialized
 
 
 if __name__ == '__main__':

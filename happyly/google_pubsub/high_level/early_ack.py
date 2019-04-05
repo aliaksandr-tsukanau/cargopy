@@ -4,12 +4,12 @@ from .base import GoogleBaseReceiver, GoogleBaseReceiveAndReply
 
 
 class GoogleEarlyAckReceiver(GoogleBaseReceiver):
-    def _after_on_received(self, message: Optional[Any]):
+    def _fetch_deserialized_and_result(self, message: Optional[Any]):
         self.ack(message)
-        super()._after_on_received(message)
+        super()._fetch_deserialized_and_result(message)
 
 
 class GoogleEarlyAckReceiveAndReply(GoogleBaseReceiveAndReply):
-    def _after_on_received(self, message: Optional[Any]):
+    def _fetch_deserialized_and_result(self, message: Optional[Any]):
         self.ack(message)
-        super()._after_on_received(message)
+        super()._fetch_deserialized_and_result(message)

@@ -126,9 +126,9 @@ class EarlyAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
     :meth:`.on_received` callback is finished.
     """
 
-    def _after_on_received(self, message: Optional[Any]):
+    def _fetch_deserialized_and_result(self, message: Optional[Any]):
         self.ack(message)
-        super()._after_on_received(message)
+        super()._fetch_deserialized_and_result(message)
 
 
 class LateAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
