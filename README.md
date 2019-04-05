@@ -1,5 +1,6 @@
 [![Happyly on PyPI](https://img.shields.io/pypi/v/happyly.svg)](https://pypi.python.org/pypi/happyly)
 [![Python version](https://img.shields.io/pypi/pyversions/happyly.svg)](https://pypi.python.org/pypi/happyly)
+[![Build Status](https://travis-ci.com/equeumco/happyly.svg?branch=master)](https://travis-ci.com/equeumco/happyly)
 
 # Description
 Happyly helps to build an extensible codebase when you are using Google Pub/Sub - and potentially any similar technology.
