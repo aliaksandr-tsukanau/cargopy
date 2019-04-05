@@ -44,7 +44,7 @@ From the `bumpversin`'s point of view, there are two additional version parts:
 `rel` (which can be either `alpha`, `rc` or missing = `release`)
 and `rc` which denotes number of release candidate.
 `alpha` is not used by `bumpversion` directly
-but can be used when specifying version manually: `bumpversion --new-version 1.1.0alpha1`.
+but can be used when specifying version manually: `bumpversion [major|minor|patch] --new-version 1.1.0alpha1`.
 If you use `bumpversion rel` on such version, it will first transition from `alphaN` to `rc1`,
 and only then will it switch to `release`, rejecting `rc` suffix.
 
