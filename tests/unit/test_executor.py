@@ -181,3 +181,86 @@ def test_executor_with_input(
     result = executor.run_for_result("original message")
     assert_callbacks()
     assert result == {'i am': 'serialized'}
+
+
+@patch('test_executor.Executor.on_received')
+@patch('test_executor.Executor.on_deserialized')
+@patch('test_executor.Executor.on_deserialization_failed')
+@patch('test_executor.Executor.on_handled')
+@patch('test_executor.Executor.on_handling_failed')
+@patch('test_executor.Executor.on_serialized')
+@patch('test_executor.Executor.on_serialization_failed')
+@patch('test_executor.Executor.on_published')
+@patch('test_executor.Executor.on_publishing_failed')
+@patch('test_executor.Executor.on_finished')
+@patch('test_executor.Executor.on_stopped')
+@patch(
+    'test_executor.TestHandler.__call__',
+    return_value=HandlingResult.ok({'result': 42}),  # type: ignore
+)
+def test_serialization_failure(
+    handler,
+    on_stopped,
+    on_finished,
+    on_publishing_failed,
+    on_published,
+    on_serialization_failed,
+    on_serialized,
+    on_handling_failed,
+    on_handled,
+    on_deserialization_failed,
+    on_deserialized,
+    on_received,
+):
+    error = KeyError('123')
+
+    class TestDeser(Deserializer):
+        def deserialize(self, message: Any) -> Mapping[str, Any]:
+            raise error
+
+        def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
+            return {"SPAM": "EGGS"}
+
+    des = TestDeser()
+    executor = Executor(handler=TestHandler(), deserializer=des, publisher=None)
+    executor.run("orig")
+
+    def assert_callbacks():
+        on_received.assert_called_with("orig")
+        on_deserialized.assert_not_called()
+        on_deserialization_failed.assert_called_with(message="orig", error=error)
+        handler.assert_not_called()
+        on_handled.assert_not_called()
+        on_handling_failed.assert_not_called()
+        on_serialized.assert_called_with(
+            original="orig",
+            deserialized=None,
+            result=HandlingResult.err({'SPAM': 'EGGS'}),
+            serialized={'SPAM': 'EGGS'},
+        )
+        on_serialization_failed.assert_not_called()
+        on_published.assert_not_called()
+        on_publishing_failed.assert_not_called()
+        on_finished.assert_called_with(original_message="orig", error=None)
+        on_stopped.assert_not_called()
+
+        for callback in [
+            handler,
+            on_stopped,
+            on_finished,
+            on_publishing_failed,
+            on_published,
+            on_serialization_failed,
+            on_serialized,
+            on_handling_failed,
+            on_handled,
+            on_deserialization_failed,
+            on_deserialized,
+            on_received,
+        ]:
+            callback.reset_mock()
+
+    assert_callbacks()
+    result = executor.run_for_result("orig")
+    assert_callbacks()
+    assert result == {'SPAM': 'EGGS'}
