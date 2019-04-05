@@ -41,8 +41,8 @@ Use cases
             process_things(attributes['ID'])
         except NeedToRetry:
             _LOGGER.info('Not acknowledging, will retry later.')
-            pass
         except Exception:
+            _LOGGER.error('An error occured')
             message.ack()
         message.ack()
 
@@ -53,16 +53,18 @@ Use cases
     class MyHandler(happyly.handler):
         def handle(attributes: dict):
             if attributes['STATUS'] == 'FAILED':
-                raise StatusFailed
+                raise NeedToRetry
             process_things(attributes['ID'])
 
         def on_handling_failed(attributes: dict, error):
             if isinstance(error, NeedToRetry):
                 raise error from error
+            else:
+                _LOGGER.error('An error occured')
 
   :code:`MyHandler` is now also usable with Celery or Flask.
   Or with yaml serialization.
-  Or with :code:`message.attributes` instead of `message.data`.
+  Or with :code:`message.attributes` instead of :code:`message.data`.
   Without any change.
 
 * You are going to **change messaging technology** later.
