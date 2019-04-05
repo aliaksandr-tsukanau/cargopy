@@ -47,6 +47,8 @@ class Executor(Generic[D, P, SE]):
     """
 
     deserializer: D = DUMMY_SERDE  # type: ignore
+    # Why type:ignore? Because DUMMY_SERDE is a subclass of Deserializer
+    # but not necessarily subclass of whatever D will be in runtime.
     """
     Provides implementation of deserialization stage to Executor.
 
