@@ -58,6 +58,6 @@ and hence won't trigger deployment for intermediary `rc1` version.
 
 # License
 
-The code of this repository is licensed under [MIT License](LICENSE),
+The code inside this repository is licensed under [MIT License](LICENSE),
 while images and documentation material are licensed under
 [Creative Commons BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
