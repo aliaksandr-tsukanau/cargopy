@@ -587,3 +587,86 @@ def test_stop_on_received(
     with pytest.raises(FetchedNoResult):
         executor.run_for_result("original message")
     assert_callbacks()
+
+
+@patch('test_executor.Executor.on_received')
+@patch('test_executor.Executor.on_deserialized', side_effect=_STOP)
+@patch('test_executor.Executor.on_deserialization_failed')
+@patch('test_executor.Executor.on_handled')
+@patch('test_executor.Executor.on_handling_failed')
+@patch('test_executor.Executor.on_serialized')
+@patch('test_executor.Executor.on_serialization_failed')
+@patch('test_executor.Executor.on_published')
+@patch('test_executor.Executor.on_publishing_failed')
+@patch('test_executor.Executor.on_finished')
+@patch('test_executor.Executor.on_stopped')
+@patch(
+    'test_executor.TestHandler.__call__',
+    return_value=HandlingResult.ok({'result': 42}),  # type: ignore
+)
+def test_stop_on_deserialized(
+    handler,
+    on_stopped,
+    on_finished,
+    on_publishing_failed,
+    on_published,
+    on_serialization_failed,
+    on_serialized,
+    on_handling_failed,
+    on_handled,
+    on_deserialization_failed,
+    on_deserialized,
+    on_received,
+):
+    class TestDeser(Deserializer):
+        def deserialize(self, message: Any) -> Mapping[str, Any]:
+            return {'spam': 'eggs'}
+
+    class TestSer(Serializer):
+        def serialize(self, message_attributes: Mapping[str, Any]) -> Any:
+            return {'i am': 'serialized'}
+
+    des = TestDeser()
+    ser = TestSer()
+    executor = Executor(
+        handler=TestHandler(), deserializer=des, publisher=None, serializer=ser
+    )
+    assert executor.deserializer == des
+    assert executor.serializer == ser
+    assert executor.publisher is None
+    executor.run("original message")
+
+    def assert_callbacks():
+        on_received.assert_called_with("original message")
+        on_deserialized.assert_called_with(original_message='original message', parsed_message={'spam': 'eggs'})
+        on_deserialization_failed.assert_not_called()
+        handler.assert_not_called()
+        on_handled.assert_not_called()
+        on_handling_failed.assert_not_called()
+        on_serialized.assert_not_called()
+        on_serialization_failed.assert_not_called()
+        on_published.assert_not_called()
+        on_publishing_failed.assert_not_called()
+        on_finished.assert_not_called()
+        on_stopped.assert_called_with(original_message="original message", reason='reason')
+
+        for callback in [
+            handler,
+            on_stopped,
+            on_finished,
+            on_publishing_failed,
+            on_published,
+            on_serialization_failed,
+            on_serialized,
+            on_handling_failed,
+            on_handled,
+            on_deserialization_failed,
+            on_deserialized,
+            on_received,
+        ]:
+            callback.reset_mock()
+
+    assert_callbacks()
+    with pytest.raises(FetchedNoResult):
+        executor.run_for_result("original message")
+    assert_callbacks()
