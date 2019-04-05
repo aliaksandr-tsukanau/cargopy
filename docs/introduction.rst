@@ -34,17 +34,17 @@ Use cases
 
     def callback(message):
         attributes = json.loads(message.data)
-        if attributes['STATUS'] == 'FAILED':
-            message.ack()
-            return
         try:
-            process_things(attributes['ID'])
+            result = process_things(attributes['ID'])    
+            encoded = json.dumps(result).encode('utf-8')
+            PUBLISHER.publish(TOPIC, encoded)
         except NeedToRetry:
             _LOGGER.info('Not acknowledging, will retry later.')
         except Exception:
             _LOGGER.error('An error occured')
             message.ack()
-        message.ack()
+        else:
+            message.ack()
 
   Happyly way:
 
@@ -52,9 +52,7 @@ Use cases
 
     class MyHandler(happyly.handler):
         def handle(attributes: dict):
-            if attributes['STATUS'] == 'FAILED':
-                raise NeedToRetry
-            process_things(attributes['ID'])
+            return process_things(attributes['ID'])
 
         def on_handling_failed(attributes: dict, error):
             if isinstance(error, NeedToRetry):
