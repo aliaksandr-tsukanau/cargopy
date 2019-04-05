@@ -565,7 +565,9 @@ def test_stop_on_received(
         on_published.assert_not_called()
         on_publishing_failed.assert_not_called()
         on_finished.assert_not_called()
-        on_stopped.assert_called_with(original_message="original message", reason='reason')
+        on_stopped.assert_called_with(
+            original_message="original message", reason='reason'
+        )
 
         for callback in [
             handler,
@@ -638,7 +640,9 @@ def test_stop_on_deserialized(
 
     def assert_callbacks():
         on_received.assert_called_with("original message")
-        on_deserialized.assert_called_with(original_message='original message', parsed_message={'spam': 'eggs'})
+        on_deserialized.assert_called_with(
+            original_message='original message', parsed_message={'spam': 'eggs'}
+        )
         on_deserialization_failed.assert_not_called()
         handler.assert_not_called()
         on_handled.assert_not_called()
@@ -648,7 +652,9 @@ def test_stop_on_deserialized(
         on_published.assert_not_called()
         on_publishing_failed.assert_not_called()
         on_finished.assert_not_called()
-        on_stopped.assert_called_with(original_message="original message", reason='reason')
+        on_stopped.assert_called_with(
+            original_message="original message", reason='reason'
+        )
 
         for callback in [
             handler,
