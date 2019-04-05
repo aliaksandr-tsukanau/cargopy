@@ -12,18 +12,26 @@ from tests.unit.test_handler import TestHandler
 @patch('test_executor.Executor.on_deserialized')
 @patch('test_executor.Executor.on_deserialization_failed')
 @patch('test_executor.Executor.on_handled')
+@patch('test_executor.Executor.on_handling_failed')
+@patch('test_executor.Executor.on_serialized')
+@patch('test_executor.Executor.on_serialization_failed')
 @patch('test_executor.Executor.on_published')
 @patch('test_executor.Executor.on_publishing_failed')
 @patch('test_executor.Executor.on_finished')
+@patch('test_executor.Executor.on_stopped')
 @patch(
     'test_executor.TestHandler.__call__',
-    return_value=HandlingResult.ok(42),  # type: ignore
+    return_value=HandlingResult.ok({'result': 42}),  # type: ignore
 )
 def test_executor_no_input(
     handler,
+    on_stopped,
     on_finished,
     on_publishing_failed,
     on_published,
+    on_serialization_failed,
+    on_serialized,
+    on_handling_failed,
     on_handled,
     on_deserialization_failed,
     on_deserialized,
@@ -31,20 +39,40 @@ def test_executor_no_input(
 ):
     executor = Executor(handler=TestHandler())
     assert executor.deserializer is DUMMY_SERDE
+    assert executor.serializer is DUMMY_SERDE
     assert executor.publisher is None
     executor.run()
-    on_received.assert_called_with(None)
-    on_deserialized.assert_called_with(original_message=None, parsed_message={})
-    handler.assert_called_with({})
-    on_handled.assert_called_with(
-        original_message=None,
-        parsed_message={},
-        result=HandlingResult(HandlingResultStatus.OK, data=42),  # type: ignore
-    )
-    on_published.assert_not_called()
-    on_publishing_failed.assert_not_called()
-    on_deserialization_failed.assert_not_called()
-    on_finished.assert_called_with(original_message=None, error=None)
+
+    def assert_callbacks():
+        on_received.assert_called_with(None)
+        on_deserialized.assert_called_with(original_message=None, parsed_message={})
+        on_deserialization_failed.assert_not_called()
+        handler.assert_called_with({})
+        on_handled.assert_called_with(
+            original_message=None,
+            parsed_message={},
+            result=HandlingResult(
+                HandlingResultStatus.OK, data={'result': 42}
+            ),  # type: ignore
+        )
+        on_handling_failed.assert_not_called()
+        on_serialized.assert_called_with(
+            original=None,
+            deserialized={},
+            result=HandlingResult.ok({'result': 42}),
+            serialized={'result': 42},
+        )
+        on_serialization_failed.assert_not_called()
+        on_published.assert_not_called()
+        on_publishing_failed.assert_not_called()
+        on_finished.assert_called_with(original_message=None, error=None)
+        on_stopped.assert_not_called()
+
+    assert_callbacks()
+
+    result = executor.run_for_result()
+    assert_callbacks()
+    assert result == {'result': 42}
 
 
 @patch('test_executor.Executor.on_received')
@@ -71,11 +99,6 @@ def test_executor_with_input(
     class TestDeser(Deserializer):
         def deserialize(self, message: Any) -> Mapping[str, Any]:
             return {'spam': 'eggs'}
-
-        def build_error_result(
-            self, message: Any, error: Exception
-        ) -> Mapping[str, Any]:
-            raise error
 
     des = TestDeser()
     executor = Executor(handler=TestHandler(), deserializer=des, publisher=None)
