@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
 ]
+lisence="MIT, CC BY-NC-SA 4.0"
 keywords = "google pubsub"
 requires = [
     "attrs>=19.1",
