@@ -333,7 +333,7 @@ class Executor(Generic[D, P, SE]):
             return deserialized, None, serialized
         except Exception as e:
             self.on_finished(original_message=message, error=e)
-            return deserialized, None, serialized
+            raise e from e
         else:
             return deserialized, result, serialized
 
@@ -349,7 +349,10 @@ class Executor(Generic[D, P, SE]):
             if the executor was instantiated with neither a deserializer nor a handler
             (useful to quickly publish message attributes by hand)
         """
-        deserialized, result, serialized = self._run_impl(message)
+        try:
+            deserialized, result, serialized = self._run_impl(message)
+        except Exception:
+            return
         if serialized is None or result is None or self.publisher is None:
             self.on_finished(original_message=message, error=None)
             return
@@ -359,7 +362,10 @@ class Executor(Generic[D, P, SE]):
             self.on_stopped(original_message=message, reason=e.reason)
 
     def run_for_result(self, message: Optional[Any] = None):
-        _, _, serialized = self._run_impl(message)
+        try:
+            _, _, serialized = self._run_impl(message)
+        except Exception as e:
+            raise FetchedNoResult from e
         self.on_finished(original_message=message, error=None)
         if serialized is None:
             raise FetchedNoResult
