@@ -2,9 +2,19 @@ API Reference
 =============
 
 .. inheritance-diagram::
-   happyly.listening.executor.Executor
-   happyly.listening.listener.EarlyAckListener
-   happyly.listening.listener.LateAckListener
+   happyly.Executor
+   happyly.listening.EarlyAckListener
+   happyly.listening.LateAckListener
+   happyly.Schema
+   happyly.Cacher
+   happyly.caching.mixins.CacheByRequestIdMixin
+   happyly.Serializer
+   happyly.Deserializer
+   happyly.Handler
+   happyly.handling.HandlingResult
+   happyly.handling.HandlingResultStatus
+   happyly.handling.dummy_handler._DummyHandler
+   happyly.exceptions
    :parts: -1
 
 .. autosummary::
