@@ -1,6 +1,12 @@
 API Reference
 =============
 
+.. inheritance-diagram::
+   happyly.listening.executor.Executor
+   happyly.listening.listener.EarlyAckListener
+   happyly.listening.listener.LateAckListener
+   :parts: -1
+
 .. autosummary::
    :toctree: _autosummary
 
