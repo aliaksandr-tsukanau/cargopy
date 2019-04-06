@@ -1,0 +1,4 @@
+# ReadTheDocs does not properly support our requirements in pyproject.toml,
+# and our workaround in conf.py does not allow us to reliably update Sphinx itself.
+# So use this rudimentary file.
+sphinx>=2.0.0
