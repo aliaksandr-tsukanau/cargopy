@@ -19,22 +19,6 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-if os.environ.get('READTHEDOCS'):
-    # We want to make sure all dependencies are installed.
-    # ReadTheDocs supports only requirements.txt but not other formats,
-    # so use this trick:
-    # first use pip to install flit in our virtualenv...
-    from pip._internal import main as pipmain
-
-    pipmain(['install', 'flit'])
-    # workaround for pip#5882
-    os.environ.pop('PIP_REQ_TRACKER', None)
-
-    # ...and then use flit to install the package and all its dependencies
-    import flit
-
-    flit.main(['-f', '../pyproject.toml', 'install', '--extras=all'])
-
 
 # workaround python-attrs/attrs#523
 # (it hides some class attributes in members summary)
