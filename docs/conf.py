@@ -264,6 +264,12 @@ intersphinx_mapping = {
 todo_include_todos = True
 
 
+# -- Options for graphviz and inheritance_diagram
+
+# Use SVG rather than PNG: nowadays anyone should support SVG, right?
+graphviz_output_format = 'svg'
+
+
 # Enhance sphinx_autodoc_typehints with support for class fields.
 # This implementation is somewhat dirty;
 # probably we should improve it and make a PR?
