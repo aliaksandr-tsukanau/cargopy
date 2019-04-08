@@ -10,7 +10,7 @@ from typing import Any, TypeVar, Optional, Generic
 from happyly.serialization.serializer import Serializer
 from happyly.serialization.dummy import DUMMY_SERDE
 from happyly.handling import Handler
-from happyly.pubsub import Publisher
+from happyly.pubsub import BasePublisher
 from happyly.pubsub.subscriber import BaseSubscriber, SubscriberWithAck
 from happyly.serialization import Deserializer
 from .executor import Executor
@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 D = TypeVar("D", bound=Deserializer)
-P = TypeVar("P", bound=Publisher)
+P = TypeVar("P", bound=BasePublisher)
 S = TypeVar("S", bound=BaseSubscriber)
 SE = TypeVar("SE", bound=Serializer)
 

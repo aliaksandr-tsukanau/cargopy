@@ -13,4 +13,9 @@ class StopPipeline(Exception):
 
 @attrs(auto_exc=True)  # type: ignore
 class FetchedNoResult(Exception):
+    """
+    Exception thrown by :meth:`Executor.run_for_result`
+    when it is unable to fetch a result
+    """
+
     pass

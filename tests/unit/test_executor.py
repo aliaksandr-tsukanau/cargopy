@@ -443,9 +443,7 @@ _ERR = KeyError('123')
 @patch('test_executor.Executor.on_publishing_failed')
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
-@patch(
-    'test_executor.TestHandler.__call__', side_effect=_ERR  # type: ignore
-)
+@patch('test_executor.TestHandler.__call__', side_effect=_ERR)  # type: ignore
 def test_handling_fallback_fails(
     handler,
     on_stopped,

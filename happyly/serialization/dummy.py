@@ -35,23 +35,34 @@ class DummySerde(Deserializer, Serializer):
 
 
 DUMMY_DESERIALIZER: DummySerde = DummySerde()
+
 DUMMY_SERDE: DummySerde = DummySerde()
+"""
+Serializer/deserializer which transforms message attributes to themselves
+"""
 
 
 @attrs(auto_attribs=True, frozen=True)
 class DummyValidator(Deserializer, Serializer):
+    """
+    Serializer/deserializer which transforms message attributes to themselves
+    along with validating against message schema.
+    """
 
     schema: marshmallow.Schema
+    """
+    Schema which will be used to validate the provided message
+    """
 
     def _validate(self, message):
         errors = self.schema.validate(message)
         if errors != {}:
             raise marshmallow.ValidationError(str(errors))
 
-    def deserialize(self, message: Any) -> Mapping[str, Any]:
+    def deserialize(self, message: Mapping[str, Any]) -> Mapping[str, Any]:
         self._validate(message)
         return message
 
-    def serialize(self, message_attributes: Mapping[str, Any]) -> Any:
+    def serialize(self, message_attributes: Mapping[str, Any]) -> Mapping[str, Any]:
         self._validate(message_attributes)
         return message_attributes

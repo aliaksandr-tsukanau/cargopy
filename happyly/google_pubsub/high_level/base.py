@@ -25,7 +25,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
     ListenerWithAck[
         JSONDeserializerWithRequestIdRequired,
         Union[None, GooglePubSubPublisher],
-        DummySerde,
+        Union[DummySerde, BinaryJSONSerializer],
     ]
 ):
     """

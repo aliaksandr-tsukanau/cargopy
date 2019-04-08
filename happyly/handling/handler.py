@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Mapping, Any
-
-from .types import ZeroToManyParsedMessages
-from .handling_result import HandlingResult
+from typing import Mapping, Any, Optional
 
 _no_base_impl = NotImplementedError('No default implementation in base Handler class')
 
@@ -13,7 +10,7 @@ class Handler(ABC):
     """
 
     @abstractmethod
-    def handle(self, message: Mapping[str, Any]) -> ZeroToManyParsedMessages:
+    def handle(self, message: Mapping[str, Any]) -> Optional[Mapping[str, Any]]:
         """
         Applies logic using a provided message,
         optionally gives back one or more results.
@@ -24,14 +21,13 @@ class Handler(ABC):
 
         :return: None if no result is extracted from handling,
             a dictionary of attributes for single result
-            or a list of dictionaries if handling provides multiple results
         """
         raise _no_base_impl
 
     @abstractmethod
     def on_handling_failed(
         self, message: Mapping[str, Any], error: Exception
-    ) -> ZeroToManyParsedMessages:
+    ) -> Optional[Mapping[str, Any]]:
         """
         Applies fallback logic using a provided message
         when :meth:`handle` fails,
@@ -49,14 +45,11 @@ class Handler(ABC):
         :param error: Error raised by :meth:`handle`
         :return: None if no result is extracted from handling,
             a dictionary of attributes for single result
-            or a list of dictionaries if handling provides multiple results
         """
         raise _no_base_impl
 
-    def __call__(self, message: Mapping[str, Any]) -> HandlingResult:
+    def __call__(self, message: Mapping[str, Any]) -> Optional[Mapping[str, Any]]:
         try:
-            result_data = self.handle(message)
-            return HandlingResult.ok(result_data)
+            return self.handle(message)
         except Exception as e:
-            result_data = self.on_handling_failed(message, e)
-            return HandlingResult.err(result_data)
+            return self.on_handling_failed(message, e)
