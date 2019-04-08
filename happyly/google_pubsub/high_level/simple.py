@@ -7,7 +7,7 @@ from .early_ack import GoogleEarlyAckReceiver, GoogleEarlyAckReceiveAndReply
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
-from ..serializers import BinaryJSONSerializer
+from serialization.json import BinaryJSONSerializer
 from happyly.handling import Handler
 from happyly.listening.executor import Executor
 

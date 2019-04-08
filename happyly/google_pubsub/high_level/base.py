@@ -9,7 +9,7 @@ from serialization import DUMMY_SERDE
 from ..subscribers import GooglePubSubSubscriber
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
-from ..serializers import BinaryJSONSerializer
+from serialization.json import BinaryJSONSerializer
 from happyly import Handler
 from happyly.listening.listener import ListenerWithAck
 
