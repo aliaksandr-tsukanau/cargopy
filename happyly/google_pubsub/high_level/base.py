@@ -170,15 +170,16 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
             project=project, subscription_name=from_subscription
         )
         deserializer = JSONDeserializerWithRequestIdRequired(schema=input_schema)
+        serializer = BinaryJSONSerializer(schema=output_schema)
         publisher = GooglePubSubPublisher(
             project=project,
-            publish_all_to=to_topic,
-            serializer=BinaryJSONSerializer(schema=output_schema),
+            to_topic=to_topic,
         )
         super().__init__(
             handler=handler,
             deserializer=deserializer,
             subscriber=subscriber,
+            serializer=serializer,
             publisher=publisher,
             from_topic=from_topic,
         )
