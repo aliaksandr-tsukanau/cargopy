@@ -22,8 +22,7 @@ from tests.unit.test_handler import TestHandler
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
 @patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'result': 42},  # type: ignore
+    'test_executor.TestHandler.__call__', return_value={'result': 42}  # type: ignore
 )
 def test_executor_no_input(
     handler,
@@ -47,13 +46,13 @@ def test_executor_no_input(
 
     def assert_callbacks():
         on_received.assert_called_with(None)
-        on_deserialized.assert_called_with(original_message=None, deserialized_message={})
+        on_deserialized.assert_called_with(
+            original_message=None, deserialized_message={}
+        )
         on_deserialization_failed.assert_not_called()
         handler.assert_called_with({})
         on_handled.assert_called_with(
-            original_message=None,
-            deserialized_message={},
-            result={'result': 42},
+            original_message=None, deserialized_message={}, result={'result': 42}
         )
         on_handling_failed.assert_not_called()
         on_serialized.assert_called_with(
@@ -102,8 +101,7 @@ def test_executor_no_input(
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
 @patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'result': 42},  # type: ignore
+    'test_executor.TestHandler.__call__', return_value={'result': 42}  # type: ignore
 )
 def test_executor_with_input(
     handler,
@@ -197,8 +195,7 @@ def test_executor_with_input(
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
 @patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'result': 42},  # type: ignore
+    'test_executor.TestHandler.__call__', return_value={'result': 42}  # type: ignore
 )
 def test_serialization_failure(
     handler,
@@ -232,7 +229,9 @@ def test_serialization_failure(
     def assert_callbacks():
         on_received.assert_called_with("orig")
         on_deserialized.assert_not_called()
-        on_deserialization_failed.assert_called_with(original_message="orig", error=error)
+        on_deserialization_failed.assert_called_with(
+            original_message="orig", error=error
+        )
         handler.assert_not_called()
         on_handled.assert_not_called()
         on_handling_failed.assert_not_called()
@@ -282,8 +281,7 @@ def test_serialization_failure(
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
 @patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'result': 42},  # type: ignore
+    'test_executor.TestHandler.__call__', return_value={'result': 42}  # type: ignore
 )
 def test_serialization_fallback_failure(
     handler,
@@ -312,7 +310,9 @@ def test_serialization_fallback_failure(
     def assert_callbacks():
         on_received.assert_called_with("orig")
         on_deserialized.assert_not_called()
-        on_deserialization_failed.assert_called_with(original_message="orig", error=error)
+        on_deserialization_failed.assert_called_with(
+            original_message="orig", error=error
+        )
         handler.assert_not_called()
         on_handled.assert_not_called()
         on_handling_failed.assert_not_called()
@@ -356,10 +356,7 @@ def test_serialization_fallback_failure(
 @patch('test_executor.Executor.on_publishing_failed')
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
-@patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'error': 42},  # type: ignore
-)
+@patch('test_executor.TestHandler.__call__', return_value={'error': 42})  # type: ignore
 def test_handling_status_err(
     handler,
     on_stopped,
@@ -465,7 +462,9 @@ def test_handling_fallback_fails(
         handler.assert_called_with({'orig': 'msg'})
         on_handled.assert_not_called()
         on_handling_failed.assert_called_with(
-            original_message={'orig': 'msg'}, deserialized_message={'orig': 'msg'}, error=_ERR
+            original_message={'orig': 'msg'},
+            deserialized_message={'orig': 'msg'},
+            error=_ERR,
         )
         on_serialized.assert_not_called()
         on_serialization_failed.assert_not_called()
@@ -511,8 +510,7 @@ _STOP = StopPipeline('reason')
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
 @patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'result': 42},  # type: ignore
+    'test_executor.TestHandler.__call__', return_value={'result': 42}  # type: ignore
 )
 def test_stop_on_received(
     handler,
@@ -596,8 +594,7 @@ def test_stop_on_received(
 @patch('test_executor.Executor.on_finished')
 @patch('test_executor.Executor.on_stopped')
 @patch(
-    'test_executor.TestHandler.__call__',
-    return_value={'result': 42},  # type: ignore
+    'test_executor.TestHandler.__call__', return_value={'result': 42}  # type: ignore
 )
 def test_stop_on_deserialized(
     handler,

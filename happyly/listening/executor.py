@@ -72,11 +72,14 @@ class Executor(Generic[D, P, SE]):
         Override it in your custom Executor/Listener if needed,
         but don't forget to call implementation from base class.
 
-        :param original_message: Message as it has been received, without any deserialization
+        :param original_message: Message as it has been received,
+            without any deserialization
         """
         _LOGGER.info(f"Received message: {original_message}")
 
-    def on_deserialized(self, original_message: Any, deserialized_message: Mapping[str, Any]):
+    def on_deserialized(
+        self, original_message: Any, deserialized_message: Mapping[str, Any]
+    ):
         """
         Callback which is called right after message was deserialized successfully.
 
@@ -88,7 +91,8 @@ class Executor(Generic[D, P, SE]):
         :param deserialized_message: Message attributes after deserialization
         """
         _LOGGER.info(
-            f"Message successfully deserialized into attributes: {deserialized_message}"
+            'Message successfully deserialized into attributes: '
+            f'{deserialized_message}'
         )
 
     def on_deserialization_failed(self, original_message: Any, error: Exception):
@@ -98,7 +102,8 @@ class Executor(Generic[D, P, SE]):
         Override it in your custom Executor/Listener if needed,
         but don't forget to call implementation from base class.
 
-        :param original_message: Message as it has been received, without any deserialization
+        :param original_message: Message as it has been received,
+            without any deserialization
         :param error: exception object which was raised
         """
         _LOGGER.exception(
@@ -106,10 +111,10 @@ class Executor(Generic[D, P, SE]):
         )
 
     def on_handled(
-            self,
-            original_message: Any,
-            deserialized_message: Mapping[str, Any],
-            result: Optional[Mapping[str, Any]]
+        self,
+        original_message: Any,
+        deserialized_message: Mapping[str, Any],
+        result: Optional[Mapping[str, Any]],
     ):
         """
         Callback which is called right after message was handled
@@ -126,7 +131,12 @@ class Executor(Generic[D, P, SE]):
         """
         _LOGGER.info(f"Message handled, result: {result}.")
 
-    def on_handling_failed(self, original_message: Any, deserialized_message: Mapping[str, Any], error: Exception):
+    def on_handling_failed(
+        self,
+        original_message: Any,
+        deserialized_message: Mapping[str, Any],
+        error: Exception,
+    ):
         """
         Callback which is called if handler's `on_handling_failed`
         raises an exception.
@@ -141,8 +151,13 @@ class Executor(Generic[D, P, SE]):
         """
         _LOGGER.exception(f'Handler raised an exception.')
 
-    def on_serialized(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]], result: _Result,
-                      serialized_message: Any):
+    def on_serialized(
+        self,
+        original_message: Any,
+        deserialized_message: Optional[Mapping[str, Any]],
+        result: _Result,
+        serialized_message: Any,
+    ):
         _LOGGER.debug('Serialized message.')
 
     def on_serialization_failed(
@@ -154,7 +169,12 @@ class Executor(Generic[D, P, SE]):
     ):
         _LOGGER.exception('Was not able to deserialize message.')
 
-    def on_published(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]], result: _Result):
+    def on_published(
+        self,
+        original_message: Any,
+        deserialized_message: Optional[Mapping[str, Any]],
+        result: _Result,
+    ):
         """
         Callback which is called right after message was published successfully.
 
@@ -169,8 +189,13 @@ class Executor(Generic[D, P, SE]):
         """
         _LOGGER.info(f"Published result: {result}")
 
-    def on_publishing_failed(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]],
-                             result: _Result, error: Exception):
+    def on_publishing_failed(
+        self,
+        original_message: Any,
+        deserialized_message: Optional[Mapping[str, Any]],
+        result: _Result,
+        error: Exception,
+    ):
         """
         Callback which is called when publisher fails to publish.
 
@@ -217,10 +242,17 @@ class Executor(Generic[D, P, SE]):
         try:
             self.publisher.publish(result)
         except Exception as e:
-            self.on_publishing_failed(original_message=original, deserialized_message=parsed, result=result, error=e)
+            self.on_publishing_failed(
+                original_message=original,
+                deserialized_message=parsed,
+                result=result,
+                error=e,
+            )
             raise e from e
         else:
-            self.on_published(original_message=original, deserialized_message=parsed, result=result)
+            self.on_published(
+                original_message=original, deserialized_message=parsed, result=result
+            )
 
     def _fetch_deserialized_and_result(
         self, message: Optional[Any]
@@ -246,7 +278,9 @@ class Executor(Generic[D, P, SE]):
             self.on_deserialization_failed(original_message=message, error=e)
             raise e from e
         else:
-            self.on_deserialized(original_message=message, deserialized_message=deserialized)
+            self.on_deserialized(
+                original_message=message, deserialized_message=deserialized
+            )
             return deserialized
 
     def _build_error_result(self, message: Any, error: Exception):
@@ -263,9 +297,13 @@ class Executor(Generic[D, P, SE]):
         try:
             result = self.handler(deserialized)
         except Exception as e:
-            self.on_handling_failed(original_message=message, deserialized_message=deserialized, error=e)
+            self.on_handling_failed(
+                original_message=message, deserialized_message=deserialized, error=e
+            )
             raise e from e
-        self.on_handled(original_message=message, deserialized_message=deserialized, result=result)
+        self.on_handled(
+            original_message=message, deserialized_message=deserialized, result=result
+        )
         return result
 
     def _serialize(
@@ -285,8 +323,12 @@ class Executor(Generic[D, P, SE]):
                 error=e,
             )
         else:
-            self.on_serialized(original_message=original_message, deserialized_message=parsed_message, result=result,
-                               serialized_message=serialized)
+            self.on_serialized(
+                original_message=original_message,
+                deserialized_message=parsed_message,
+                result=result,
+                serialized_message=serialized,
+            )
             return serialized
 
     def _run_core(

@@ -45,10 +45,7 @@ class CacheByRequestIdMixin:
         self.cacher.remove(parsed_message[self.deserializer.request_id_field])
 
     def on_published(
-        self,
-        original_message: Any,
-        parsed_message: Optional[Mapping[str, Any]],
-        result,
+        self, original_message: Any, parsed_message: Optional[Mapping[str, Any]], result
     ):
         super().on_published(original_message, parsed_message, result)
         if parsed_message is not None:

@@ -31,13 +31,13 @@ class GoogleSimpleSender(
             deserializer = None
         else:
             deserializer = JSONDeserializerWithRequestIdRequired(schema=input_schema)
-        publisher = GooglePubSubPublisher(
-            project=project,
-            to_topic=to_topic,
-        )
+        publisher = GooglePubSubPublisher(project=project, to_topic=to_topic)
         serializer = BinaryJSONSerializer(schema=output_schema)
         super().__init__(
-            publisher=publisher, handler=handler, deserializer=deserializer, serializer=serializer
+            publisher=publisher,
+            handler=handler,
+            deserializer=deserializer,
+            serializer=serializer,
         )
 
 

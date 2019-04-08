@@ -10,7 +10,7 @@ from ..subscribers import GooglePubSubSubscriber
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
 from ..serializers import BinaryJSONSerializer
-from happyly import Handler, Serializer
+from happyly import Handler
 from happyly.listening.listener import ListenerWithAck
 
 
@@ -37,7 +37,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
         subscriber: GooglePubSubSubscriber,
         handler: Handler,
         deserializer: JSONDeserializerWithRequestIdRequired,
-        serializer: Serializer = DUMMY_SERDE,
+        serializer: BinaryJSONSerializer = None,
         publisher: Optional[GooglePubSubPublisher] = None,
         from_topic: str = '',
     ):
@@ -47,14 +47,16 @@ class _BaseGoogleListenerWithRequestIdLogger(
             publisher=publisher,
             handler=handler,
             deserializer=deserializer,
-            serializer=serializer,
+            serializer=serializer if serializer is not None else DUMMY_SERDE,
         )
 
     def on_received(self, original_message: Any):
         logger = RequestIdLogger(_LOGGER, self.from_topic)
         logger.info(f"Received message: {_format_message(original_message)}")
 
-    def on_deserialized(self, original_message: Any, deserialized_message: Mapping[str, Any]):
+    def on_deserialized(
+        self, original_message: Any, deserialized_message: Mapping[str, Any]
+    ):
         assert self.deserializer is not None
         request_id = deserialized_message[self.deserializer.request_id_field]
 
@@ -70,20 +72,31 @@ class _BaseGoogleListenerWithRequestIdLogger(
             f"{_format_message(original_message)}"
         )
 
-    def on_handled(self, original_message: Any, deserialized_message: Mapping[str, Any], result):
+    def on_handled(
+        self, original_message: Any, deserialized_message: Mapping[str, Any], result
+    ):
         assert self.deserializer is not None
         request_id = deserialized_message[self.deserializer.request_id_field]
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f"Message handled, status {result.status}")
 
-    def on_handling_failed(self, original_message: Any, deserialized_message: Mapping[str, Any], error: Exception):
+    def on_handling_failed(
+        self,
+        original_message: Any,
+        deserialized_message: Mapping[str, Any],
+        error: Exception,
+    ):
         assert self.deserializer is not None
         request_id = deserialized_message[self.deserializer.request_id_field]
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f'Failed to handle message, error {error}')
 
-    def on_published(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]],
-                     result):
+    def on_published(
+        self,
+        original_message: Any,
+        deserialized_message: Optional[Mapping[str, Any]],
+        result,
+    ):
         assert self.deserializer is not None
         request_id = ''
         if deserialized_message is not None:
@@ -92,8 +105,13 @@ class _BaseGoogleListenerWithRequestIdLogger(
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f"Published result: {result.data}")
 
-    def on_publishing_failed(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]],
-                             result, error: Exception):
+    def on_publishing_failed(
+        self,
+        original_message: Any,
+        deserialized_message: Optional[Mapping[str, Any]],
+        result,
+        error: Exception,
+    ):
         assert self.deserializer is not None
         request_id = ''
         if deserialized_message is not None:
@@ -171,10 +189,7 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
         )
         deserializer = JSONDeserializerWithRequestIdRequired(schema=input_schema)
         serializer = BinaryJSONSerializer(schema=output_schema)
-        publisher = GooglePubSubPublisher(
-            project=project,
-            to_topic=to_topic,
-        )
+        publisher = GooglePubSubPublisher(project=project, to_topic=to_topic)
         super().__init__(
             handler=handler,
             deserializer=deserializer,
