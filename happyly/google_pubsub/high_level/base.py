@@ -48,70 +48,54 @@ class _BaseGoogleListenerWithRequestIdLogger(
             deserializer=deserializer,
         )
 
-    def on_received(self, message: Any):
+    def on_received(self, original_message: Any):
         logger = RequestIdLogger(_LOGGER, self.from_topic)
-        logger.info(f"Received message: {_format_message(message)}")
+        logger.info(f"Received message: {_format_message(original_message)}")
 
-    def on_deserialized(self, original_message: Any, parsed_message: Mapping[str, Any]):
+    def on_deserialized(self, original_message: Any, deserialized_message: Mapping[str, Any]):
         assert self.deserializer is not None
-        request_id = parsed_message[self.deserializer.request_id_field]
+        request_id = deserialized_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.debug(
-            f"Message successfully deserialized into attributes: {parsed_message}"
+            f"Message successfully deserialized into attributes: {deserialized_message}"
         )
 
-    def on_deserialization_failed(self, message: Any, error: Exception):
+    def on_deserialization_failed(self, original_message: Any, error: Exception):
         logger = RequestIdLogger(_LOGGER, self.from_topic)
         logger.exception(
             f"Was not able to deserialize the following message: "
-            f"{_format_message(message)}"
+            f"{_format_message(original_message)}"
         )
 
-    def on_handled(
-        self,
-        original_message: Any,
-        parsed_message: Mapping[str, Any],
-        result: HandlingResult,
-    ):
+    def on_handled(self, original_message: Any, deserialized_message: Mapping[str, Any], result: HandlingResult):
         assert self.deserializer is not None
-        request_id = parsed_message[self.deserializer.request_id_field]
+        request_id = deserialized_message[self.deserializer.request_id_field]
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f"Message handled, status {result.status}")
 
-    def on_handling_failed(
-        self, original_message: Any, parsed_message: Mapping[str, Any], error: Exception
-    ):
+    def on_handling_failed(self, original_message: Any, deserialized_message: Mapping[str, Any], error: Exception):
         assert self.deserializer is not None
-        request_id = parsed_message[self.deserializer.request_id_field]
+        request_id = deserialized_message[self.deserializer.request_id_field]
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f'Failed to handle message, error {error}')
 
-    def on_published(
-        self,
-        original_message: Any,
-        parsed_message: Optional[Mapping[str, Any]],
-        result: HandlingResult,
-    ):
+    def on_published(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]],
+                     result: HandlingResult):
         assert self.deserializer is not None
         request_id = ''
-        if parsed_message is not None:
-            request_id = parsed_message[self.deserializer.request_id_field]
+        if deserialized_message is not None:
+            request_id = deserialized_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.info(f"Published result: {result.data}")
 
-    def on_publishing_failed(
-        self,
-        original_message: Any,
-        parsed_message: Optional[Mapping[str, Any]],
-        result: HandlingResult,
-        error: Exception,
-    ):
+    def on_publishing_failed(self, original_message: Any, deserialized_message: Optional[Mapping[str, Any]],
+                             result: HandlingResult, error: Exception):
         assert self.deserializer is not None
         request_id = ''
-        if parsed_message is not None:
-            request_id = parsed_message[self.deserializer.request_id_field]
+        if deserialized_message is not None:
+            request_id = deserialized_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
         logger.exception(f"Failed to publish result: {result.data}")
