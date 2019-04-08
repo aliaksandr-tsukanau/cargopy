@@ -3,7 +3,6 @@ from typing import Optional, Union, Any, Mapping
 
 import marshmallow
 
-from happyly.handling import HandlingResult
 from happyly.logs.request_id import RequestIdLogger
 from happyly.serialization.dummy import DummySerde
 from ..subscribers import GooglePubSubSubscriber

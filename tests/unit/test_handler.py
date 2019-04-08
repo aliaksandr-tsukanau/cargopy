@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from happyly.handling import Handler, HandlingResult, HandlingResultStatus
+from happyly.handling import Handler
 
 
 def test_handler_abstract():
@@ -27,7 +27,7 @@ def test_handling_empty_message(on_handling_failed, handle):
     handle.assert_called_with({})
     on_handling_failed.assert_not_called()
 
-    assert result == HandlingResult(HandlingResultStatus.OK, {'spam': 'eggs'})
+    assert result == {'spam': 'eggs'}
 
 
 @patch('test_handler.TestHandler.handle', return_value={'a': 'b'})
@@ -39,7 +39,7 @@ def test_handling_not_empty_message(on_handling_failed, handle):
     handle.assert_called_with({'hello': 'world'})
     on_handling_failed.assert_not_called()
 
-    assert result == HandlingResult(HandlingResultStatus.OK, {'a': 'b'})
+    assert result == {'a': 'b'}
 
 
 @patch('test_handler.TestHandler.handle', side_effect=KeyError)
@@ -50,4 +50,4 @@ def test_handling_fails(on_handling_failed, handle):
 
     handle.assert_called_once()
     on_handling_failed.assert_called_once()
-    assert result == HandlingResult(HandlingResultStatus.ERR, {'err': 'error'})
+    assert result == {'err': 'error'}
