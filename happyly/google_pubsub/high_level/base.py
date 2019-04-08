@@ -4,13 +4,13 @@ from typing import Optional, Union, Any, Mapping
 import marshmallow
 
 from happyly.logs.request_id import RequestIdLogger
-from happyly.serialization.dummy import DummySerde
-from serialization import DUMMY_SERDE
+from happyly.serialization import DUMMY_SERDE
+from serialization.json import BinaryJSONSerializerForSchema
 from ..subscribers import GooglePubSubSubscriber
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
-from serialization.json import BinaryJSONSerializer
-from happyly import Handler
+from happyly.serialization.json import BinaryJSONDeserialierForSchema
+from happyly import Handler, Serializer
 from happyly.listening.listener import ListenerWithAck
 
 
@@ -25,7 +25,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
     ListenerWithAck[
         JSONDeserializerWithRequestIdRequired,
         Union[None, GooglePubSubPublisher],
-        Union[DummySerde, BinaryJSONSerializer],
+        Serializer,
     ]
 ):
     """
@@ -37,7 +37,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
         subscriber: GooglePubSubSubscriber,
         handler: Handler,
         deserializer: JSONDeserializerWithRequestIdRequired,
-        serializer: BinaryJSONSerializer = None,
+        serializer: BinaryJSONSerializerForSchema = None,
         publisher: Optional[GooglePubSubPublisher] = None,
         from_topic: str = '',
     ):
@@ -188,7 +188,7 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
             project=project, subscription_name=from_subscription
         )
         deserializer = JSONDeserializerWithRequestIdRequired(schema=input_schema)
-        serializer = BinaryJSONSerializer(schema=output_schema)
+        serializer = BinaryJSONDeserialierForSchema(schema=output_schema)
         publisher = GooglePubSubPublisher(project=project, to_topic=to_topic)
         super().__init__(
             handler=handler,

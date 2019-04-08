@@ -4,8 +4,8 @@ from typing import Any, Mapping
 from attr import attrs
 
 from happyly import Serializer, Deserializer
-from serialization.deserializer import DeserializerWithSchema
-from serialization.serializer import SerializerWithSchema
+from .deserializer import DeserializerWithSchema
+from .serializer import SerializerWithSchema
 
 
 class JSONSchemalessSerde(Serializer, Deserializer):

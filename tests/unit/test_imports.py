@@ -42,10 +42,9 @@ def test_imports():
         GooglePubSubPublisher,
         GooglePubSubSubscriber,
     )
-    from serialization.json import BinaryJSONSerializer
+    from happyly.serialization.json import BinaryJSONSerializerForSchema
     from happyly.google_pubsub.deserializers import (
         JSONDeserializerWithRequestIdRequired,
     )
-    from serialization.json import BinaryJSONSerializer
     from happyly.google_pubsub.publishers import GooglePubSubPublisher
     from happyly.google_pubsub.subscribers import GooglePubSubSubscriber

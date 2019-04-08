@@ -7,7 +7,7 @@ from .early_ack import GoogleEarlyAckReceiver, GoogleEarlyAckReceiveAndReply
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
-from serialization.json import BinaryJSONSerializer
+from happyly.serialization.json import BinaryJSONSerializerForSchema
 from happyly.handling import Handler
 from happyly.listening.executor import Executor
 
@@ -16,7 +16,7 @@ class GoogleSimpleSender(
     Executor[
         Union[None, JSONDeserializerWithRequestIdRequired],
         GooglePubSubPublisher,
-        BinaryJSONSerializer,
+        BinaryJSONSerializerForSchema,
     ]
 ):
     def __init__(
@@ -32,7 +32,7 @@ class GoogleSimpleSender(
         else:
             deserializer = JSONDeserializerWithRequestIdRequired(schema=input_schema)
         publisher = GooglePubSubPublisher(project=project, to_topic=to_topic)
-        serializer = BinaryJSONSerializer(schema=output_schema)
+        serializer = BinaryJSONSerializerForSchema(schema=output_schema)
         super().__init__(
             publisher=publisher,
             handler=handler,
