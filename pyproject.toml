@@ -37,7 +37,7 @@ test = [
     "pytest>=4.3.0", "tox>=3.7.0",
 ]
 doc = [
-    "sphinx>=1.8.5",
+    "sphinx>=2.0.0",
     "sphinx-rtd-theme>=0.4.3",
     "sphinx-autodoc-typehints>=1.6.0",
 ]

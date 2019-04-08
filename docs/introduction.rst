@@ -35,7 +35,7 @@ Use cases
     def callback(message):
         attributes = json.loads(message.data)
         try:
-            result = process_things(attributes['ID'])    
+            result = process_things(attributes['ID'])
             encoded = json.dumps(result).encode('utf-8')
             PUBLISHER.publish(TOPIC, encoded)
         except NeedToRetry:

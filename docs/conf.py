@@ -19,22 +19,6 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-if os.environ.get('READTHEDOCS'):
-    # We want to make sure all dependencies are installed.
-    # ReadTheDocs supports only requirements.txt but not other formats,
-    # so use this trick:
-    # first use pip to install flit in our virtualenv...
-    from pip._internal import main as pipmain
-
-    pipmain(['install', 'flit'])
-    # workaround for pip#5882
-    os.environ.pop('PIP_REQ_TRACKER', None)
-
-    # ...and then use flit to install the package and all its dependencies
-    import flit
-
-    flit.main(['-f', '../pyproject.toml', 'install', '--extras=all'])
-
 
 # workaround python-attrs/attrs#523
 # (it hides some class attributes in members summary)
@@ -94,6 +78,8 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.inheritance_diagram',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -260,6 +246,12 @@ intersphinx_mapping = {
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+
+# -- Options for graphviz and inheritance_diagram
+
+# Use SVG rather than PNG: nowadays anyone should support SVG, right?
+graphviz_output_format = 'svg'
 
 
 # Enhance sphinx_autodoc_typehints with support for class fields.
