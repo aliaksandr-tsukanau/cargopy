@@ -2,7 +2,6 @@ import json
 from typing import Any, Mapping, Optional
 
 from happyly.caching.cacher import Cacher
-from happyly.handling import HandlingResult
 
 
 class CacheByRequestIdMixin:
@@ -49,7 +48,7 @@ class CacheByRequestIdMixin:
         self,
         original_message: Any,
         parsed_message: Optional[Mapping[str, Any]],
-        result: HandlingResult,
+        result,
     ):
         super().on_published(original_message, parsed_message, result)
         if parsed_message is not None:
