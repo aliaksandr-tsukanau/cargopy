@@ -106,7 +106,8 @@ class Executor(Generic[D, P, SE]):
             without any deserialization
         :param error: exception object which was raised
         """
-        _LOGGER.exception(
+        _LOGGER.exception('')
+        _LOGGER.error(
             f"Was not able to deserialize the following message: {original_message}"
         )
 
@@ -149,7 +150,8 @@ class Executor(Generic[D, P, SE]):
         :param deserialized_message: Message attributes after deserialization
         :param error: exception object which was raised
         """
-        _LOGGER.exception(f'Handler raised an exception.')
+        _LOGGER.exception('')
+        _LOGGER.error(f'Handler raised an exception.')
 
     def on_serialized(
         self,
@@ -167,7 +169,8 @@ class Executor(Generic[D, P, SE]):
         result: _Result,
         error: Exception,
     ):
-        _LOGGER.exception('Was not able to deserialize message.')
+        _LOGGER.exception('')
+        _LOGGER.error('Was not able to deserialize message.')
 
     def on_published(
         self,
@@ -209,7 +212,8 @@ class Executor(Generic[D, P, SE]):
             Result fetched from handler
         :param error: exception object which was raised
         """
-        _LOGGER.exception(f"Failed to publish result: {result}")
+        _LOGGER.exception('')
+        _LOGGER.error(f"Failed to publish result: {result}")
 
     def on_finished(self, original_message: Any, error: Optional[Exception]):
         """
@@ -287,9 +291,8 @@ class Executor(Generic[D, P, SE]):
         try:
             error_result = self.deserializer.build_error_result(message, error)
         except Exception as new_e:
-            _LOGGER.exception(
-                "Deserialization failed and error result cannot be built."
-            )
+            _LOGGER.exception('')
+            _LOGGER.error("Deserialization failed and error result cannot be built.")
             raise new_e from new_e
         return error_result
 
