@@ -3,17 +3,27 @@
 [![Build Status](https://travis-ci.com/equeumco/happyly.svg?branch=master)](https://travis-ci.com/equeumco/happyly)
 
 # Description
-Happyly helps to build an extensible codebase when you are using Google Pub/Sub - and potentially any similar technology.
-Actual actions your code perform are abstracted into universal _Handlers_ which can be used with any serialization technology or messaging protocol without any change.
+Happyly helps to abstract your business logic from messaging stuff,
+so that your code is maintainable and ensures separation of concerns.
+Actual actions your code perform are abstracted into universal *Handlers*
+which can be used with any serialization technology or messaging protocol without any change.
+
+Happyly can be used with Flask, Celery, Django, Kafka or whatever
+technology which is utilized for messaging.
+Happyly also provides first-class support of Google Pub/Sub.
 
 # Why this name?
 Happyly stands for <b>HA</b>ndlers for <b>P</b>ub/sub as a <b>PY</b>thon <b>L</b>ibrar<b>Y</b>
 
+The lib was originally created for usage with Google Pub/Sub,
+but it then turned out that the idea is much more universal and can simplify
+transition between messaging and serialization technologies.
+
 # Installation
 ```pip install happyly```
 
-# Where can I learn how to use it?
-Check out [tutorial](https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb)
+# Documentation
+[Read the docs](https://happyly.readthedocs.io/en/latest/)
 
 # Development
 1. Create and activate a virtual environment (e.g. `python -m venv env; source env/bin/activate`).

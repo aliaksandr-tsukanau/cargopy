@@ -56,7 +56,7 @@ Use cases
 
   .. code-block:: python
 
-    def handle_my_stuff(message):
+    def handle_my_stuff(message: dict):
         try:
             return process_things(message['ID'])
         except NeedToRetry as error:
@@ -64,7 +64,7 @@ Use cases
         except Exception:
             _LOGGER.error('An error occured')
 
-  :code:`MyHandler` is now also usable with Celery or Flask.
+  :code:`handle_my_stuff` is now also usable with Celery or Flask.
   Or with yaml serialization.
   Or with :code:`message.attributes` instead of :code:`message.data`.
   Without any change.
