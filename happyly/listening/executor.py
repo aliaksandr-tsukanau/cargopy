@@ -364,7 +364,6 @@ class Executor(Generic[D, P, SE]):
                 assert result is not None
                 # something is serialized, so there must be a result
 
-                self.on_finished(original_message=message, error=None)
                 self._try_publish(message, deserialized, result)
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
