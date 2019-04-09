@@ -1,8 +1,11 @@
 Introduction
 ============
 
-Happyly is a scalable solution for systems which handle any kind of messages.
-Have you ever seen a codebase where serialization, acknowledgement and business logic
+Happyly helps to abstract your business logic from messaging stuff,
+so that your code is maintainable and follows single responsibility principle.
+
+Have you ever seen a codebase where serialization,
+message queue managing and business logic
 are mixed together like a spaghetti? I have.
 Imagine switching between Google Pub/Sub and Django REST Framework. Or Celery.
 This shouldn't be a nightmare but it often is.
@@ -10,11 +13,14 @@ This shouldn't be a nightmare but it often is.
 Here's the approach of Happyly:
 
 * Write you business logic in universal *Handlers*,
-  which don't care at all how you serialize things or send them over network
-  or deal with message queues.
+  which don't care at all how you serialize things or send them over network etc.
 * Describe your schemas using ORM/Framework-agnostic technology.
 * Plug-in any details of messaging protocol, serialization and networking.
   Change them with different drop-in replacements at any time.
+
+Happyly can be used with Flask, Celery, Django, Kafka or whatever
+technology which can be used for messaging
+and also provides first-class support of Google Pub/Sub.
 
 
 Use cases
@@ -50,15 +56,13 @@ Use cases
 
   .. code-block:: python
 
-    class MyHandler(happyly.handler):
-        def handle(attributes: dict):
-            return process_things(attributes['ID'])
-
-        def on_handling_failed(attributes: dict, error):
-            if isinstance(error, NeedToRetry):
-                raise error from error
-            else:
-                _LOGGER.error('An error occured')
+    def handle_my_stuff(message):
+        try:
+            return process_things(message['ID'])
+        except NeedToRetry as error:
+            raise error from error
+        except Exception:
+            _LOGGER.error('An error occured')
 
   :code:`MyHandler` is now also usable with Celery or Flask.
   Or with yaml serialization.
@@ -67,7 +71,11 @@ Use cases
 
 * You are going to **change messaging technology** later.
 
-  Easy! Here's an example.
+  Let's say you are prototyping your project with Flask
+  and are planning to move to Celery for better fault tolerance then.
+  Or to Google Pub/Sub. You just haven't decided yet.
+
+  Easy! Here's how Happyly can help.
 
   1. Define your message schemas.
 
@@ -85,8 +93,8 @@ Use cases
 
   .. code-block:: python
 
-    class ProcessThings(happyly.Handler):
-        def handle(message: dict):
+    def handle_things(message: dict):
+        try:
             req_id = message['request_id']
             if req_id in ALLOWED:
                 result = get_result_for_id(req_id)
@@ -96,15 +104,33 @@ Use cases
                 'request_id': req_id
                 'result': result
             }
-
-        def on_handling_failed(message: dict, error):
+        except Exception as error:
             return {
                 'request_id': message['request_id']
                 'result': 'error',
                 'error': str(error)
             }
 
-  3. Plug it into Celery:
+  3. Plug it into Flask:
+
+  .. code-block:: python
+
+    @app.route('/')
+    def root():
+        executor = happyly.Executor(
+            handler=handle_things,
+            deserializer=happyly.serialization.JSONDeserializerForSchema(
+                schema=MyInputSchema()
+            ),
+            serializer=happyly.serialization.flask.JsonifyForSchema(
+                schema=MyOutputSchema()
+            ),
+        )
+        request_data = request.get_json()
+        return executor.run_for_result(request_data)
+
+
+  3. Painlessly switch to Celery when you need:
 
   .. code-block:: python
 
@@ -119,7 +145,7 @@ Use cases
         )
         return result
 
-  4. Or Google Pub/Sub:
+  4. Or to Google Pub/Sub:
 
   .. code-block:: python
 
