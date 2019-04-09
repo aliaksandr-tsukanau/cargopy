@@ -1,12 +1,12 @@
 import marshmallow
 
+from .early_ack import GoogleEarlyAckReceiveAndReply, GoogleEarlyAckReceiver
 from happyly.caching.cacher import Cacher
 from happyly.caching.mixins import CacheByRequestIdMixin
 from happyly.handling import Handler
-from .simple import GoogleSimpleReceiveAndReply, GoogleSimpleReceiver
 
 
-class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleSimpleReceiveAndReply):
+class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleEarlyAckReceiveAndReply):
     def __init__(
         self,
         handler: Handler,
@@ -18,7 +18,7 @@ class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleSimpleReceiveAndR
         project: str,
         cacher: Cacher,
     ):
-        GoogleSimpleReceiveAndReply.__init__(
+        GoogleEarlyAckReceiveAndReply.__init__(
             self,
             handler=handler,
             input_schema=input_schema,
@@ -31,7 +31,7 @@ class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleSimpleReceiveAndR
         CacheByRequestIdMixin.__init__(self, cacher)
 
 
-class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleSimpleReceiver):
+class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleEarlyAckReceiver):
     def __init__(
         self,
         handler: Handler,
@@ -41,7 +41,7 @@ class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleSimpleReceiver):
         project: str,
         cacher: Cacher,
     ):
-        GoogleSimpleReceiver.__init__(
+        GoogleEarlyAckReceiver.__init__(
             self,
             handler=handler,
             input_schema=input_schema,

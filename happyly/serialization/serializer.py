@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Mapping, Any
 
+import marshmallow
+from attr import attrs
 
 _no_default = NotImplementedError('No default implementation in base Serializer class')
 
@@ -15,3 +17,9 @@ class Serializer(ABC):
     @abstractmethod
     def serialize(self, message_attributes: Mapping[str, Any]) -> Any:
         raise _no_default
+
+
+@attrs(auto_attribs=True, frozen=True)
+class SerializerWithSchema(Serializer, ABC):
+
+    schema: marshmallow.Schema

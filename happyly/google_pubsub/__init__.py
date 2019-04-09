@@ -15,6 +15,5 @@ from .high_level import (
 
 from .redis_cacher import RedisCacher
 from .deserializers import JSONDeserializerWithRequestIdRequired
-from .serializers import BinaryJSONSerializer
 from .publishers import GooglePubSubPublisher
 from .subscribers import GooglePubSubSubscriber

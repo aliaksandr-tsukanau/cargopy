@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Mapping, Any
 
+import marshmallow
+from attr import attrs
 
 _not_impl = NotImplementedError('No default implementation in base Deserializer class')
 
@@ -12,3 +14,9 @@ class Deserializer(ABC):
 
     def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
         raise error from error
+
+
+@attrs(auto_attribs=True, frozen=True)
+class DeserializerWithSchema(Deserializer, ABC):
+
+    schema: marshmallow.Schema
