@@ -1,6 +1,8 @@
 Introduction
 ============
 
+Happyly is a scalable solution for systems which handle any kind of messages.
+
 Happyly helps to abstract your business logic from messaging stuff,
 so that your code is maintainable and ensures separation of concerns.
 
