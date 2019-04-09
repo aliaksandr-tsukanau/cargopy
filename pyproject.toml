@@ -11,13 +11,13 @@ description-file = "README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Object Brokering",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
 ]
-license="MIT, CC BY-NC-SA 4.0"
-keywords = "google pubsub"
+license="MIT for code, CC BY-NC-SA 4.0 for images and docs"
 requires = [
     "attrs>=19.1",
     "google-cloud-pubsub>=0.37.2",
@@ -45,7 +45,6 @@ doc = [
 [tool.flit.metadata.urls]
 # these links will be shown on pypi page for the project
 Documentation = "https://happyly.readthedocs.io/en/latest/"
-Tutorial = "https://github.com/equeumco/happyly/blob/master/Tutorial.ipynb"
 
 [tool.black]
 line-length = 88

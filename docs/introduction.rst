@@ -2,7 +2,7 @@ Introduction
 ============
 
 Happyly helps to abstract your business logic from messaging stuff,
-so that your code is maintainable and follows single responsibility principle.
+so that your code is maintainable and ensures separation of concerns.
 
 Have you ever seen a codebase where serialization,
 message queue managing and business logic
