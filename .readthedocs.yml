@@ -12,9 +12,14 @@ formats: all
 
 python:
   version: 3.7
-  install:
-    # pip will handle our pyproject.toml
-    - method: pip
-      path: .
-      extra_requirements:
-        - doc
+# Currently, install sections causes problem on readthedocs
+# when running non-fresh-wiped build:
+# FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pip-req-build-zoozityn/setup.py'
+# Disable until figured out the reasons.
+# For now we should not use sphinx-2.0 features!
+#  install:
+#    # pip will handle our pyproject.toml
+#    - method: pip
+#      path: .
+#      extra_requirements:
+#        - doc
