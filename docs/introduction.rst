@@ -117,16 +117,12 @@ Use cases
 
   .. code-block:: python
 
-    @app.route('/')
+    @app.route('/', methods=['POST'])
     def root():
         executor = happyly.Executor(
             handler=handle_things,
-            deserializer=happyly.serialization.JSONDeserializerForSchema(
-                schema=MyInputSchema()
-            ),
-            serializer=happyly.serialization.flask.JsonifyForSchema(
-                schema=MyOutputSchema()
-            ),
+            deserializer=DummyValidator(schema=MyInputSchema()),
+            serializer=JsonifyForSchema(schema=MyOutputSchema()),
         )
         request_data = request.get_json()
         return executor.run_for_result(request_data)
