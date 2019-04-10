@@ -1,4 +1,4 @@
-"""Python library for Pub/Sub message handling."""
+"""Conveniently separate your business logic from messaging stuff."""
 
 # flake8: noqa F401
 import logging
