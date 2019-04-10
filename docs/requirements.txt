@@ -5,6 +5,7 @@
 # but subsequent builds fail with the error like this:
 # FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pip-req-build-zoozityn/setup.py'
 
-
-..
+# WARNING: this will use "obsolete" requirements!
+# I.e. it will use requirements from already-deployed version,
+# rather than from currently-building version.
 happyly[doc]
