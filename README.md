@@ -22,7 +22,7 @@ transition between messaging and serialization technologies.
 # Installation
 ```pip install happyly```
 
-For additional components use 
+For additional components use
  ```pip install happyly[flask]```
  or
  ```pip install happyly[redis]```
