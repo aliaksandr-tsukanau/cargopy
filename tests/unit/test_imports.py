@@ -48,3 +48,11 @@ def test_imports():
     )
     from happyly.google_pubsub.publishers import GooglePubSubPublisher
     from happyly.google_pubsub.subscribers import GooglePubSubSubscriber
+
+    from happyly.serialization.json import (
+        JSONDeserializerForSchema,
+        JSONSchemalessSerde,
+        BinaryJSONSerializerForSchema,
+        BinaryJSONDeserialierForSchema,
+    )
+    from happyly.serialization.flask import JsonifyForSchema
