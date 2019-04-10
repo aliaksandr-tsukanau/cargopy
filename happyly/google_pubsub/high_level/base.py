@@ -95,6 +95,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
         original_message: Any,
         deserialized_message: Optional[Mapping[str, Any]],
         result,
+        serialized_message,
     ):
         assert self.deserializer is not None
         request_id = ''
@@ -102,13 +103,14 @@ class _BaseGoogleListenerWithRequestIdLogger(
             request_id = deserialized_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
-        logger.info(f"Published result: {result}")
+        logger.info(f"Published serialized result: {serialized_message}")
 
     def on_publishing_failed(
         self,
         original_message: Any,
         deserialized_message: Optional[Mapping[str, Any]],
         result,
+        serialized_message,
         error: Exception,
     ):
         assert self.deserializer is not None
@@ -117,7 +119,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
             request_id = deserialized_message[self.deserializer.request_id_field]
 
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
-        logger.exception(f"Failed to publish result: {result}")
+        logger.exception(f"Failed to publish result: {serialized_message}")
 
     def on_acknowledged(self, message: Any):
         assert self.deserializer is not None

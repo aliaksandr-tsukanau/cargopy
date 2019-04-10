@@ -225,6 +225,7 @@ class Executor(Generic[D, P, SE]):
         original_message: Any,
         deserialized_message: Optional[Mapping[str, Any]],
         result: _Result,
+        serialized_message: Any,
     ):
         """
         Callback which is called right after message was published successfully.
@@ -245,6 +246,7 @@ class Executor(Generic[D, P, SE]):
         original_message: Any,
         deserialized_message: Optional[Mapping[str, Any]],
         result: _Result,
+        serialized_message: Any,
         error: Exception,
     ):
         """
@@ -288,22 +290,30 @@ class Executor(Generic[D, P, SE]):
         _LOGGER.info(f'Stopped pipeline{s}')
 
     def _try_publish(
-        self, original: Any, parsed: Optional[Mapping[str, Any]], result: _Result
+        self,
+        original: Any,
+        parsed: Optional[Mapping[str, Any]],
+        result: _Result,
+        serialized: Any,
     ):
         assert self.publisher is not None
         try:
-            self.publisher.publish(result)
+            self.publisher.publish(serialized)
         except Exception as e:
             self.on_publishing_failed(
                 original_message=original,
                 deserialized_message=parsed,
                 result=result,
+                serialized_message=serialized,
                 error=e,
             )
             raise e from e
         else:
             self.on_published(
-                original_message=original, deserialized_message=parsed, result=result
+                original_message=original,
+                deserialized_message=parsed,
+                result=result,
+                serialized_message=serialized,
             )
 
     def _fetch_deserialized_and_result(
@@ -412,7 +422,7 @@ class Executor(Generic[D, P, SE]):
                 assert result is not None
                 # something is serialized, so there must be a result
 
-                self._try_publish(message, deserialized, result)
+                self._try_publish(message, deserialized, result, serialized)
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
         except Exception as e:
