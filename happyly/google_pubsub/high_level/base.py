@@ -77,7 +77,7 @@ class _BaseGoogleListenerWithRequestIdLogger(
         assert self.deserializer is not None
         request_id = deserialized_message[self.deserializer.request_id_field]
         logger = RequestIdLogger(_LOGGER, self.from_topic, request_id)
-        logger.info(f"Message handled, status {result.status}")
+        logger.info(f"Message handled, result {result}")
 
     def on_handling_failed(
         self,
