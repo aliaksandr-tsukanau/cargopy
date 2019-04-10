@@ -23,3 +23,5 @@ python:
 #      path: .
 #      extra_requirements:
 #        - doc
+  install:
+    - requirements: docs/requirements.txt

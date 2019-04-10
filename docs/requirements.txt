@@ -1,0 +1,9 @@
+# This is a rudimentary requirements file
+# required because readthedocs does not properly handle non-setuptools packages:
+# when we try to use `pip` method to install `.` package,
+# first build after wipe works fine,
+# but subsequent builds fail with the error like this:
+# FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pip-req-build-zoozityn/setup.py'
+
+
+..[doc]
