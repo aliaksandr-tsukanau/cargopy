@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Mapping, Any
+from typing import Mapping, Any, Callable
 
 import marshmallow
 from attr import attrs
@@ -14,6 +14,16 @@ class Deserializer(ABC):
 
     def build_error_result(self, message: Any, error: Exception) -> Mapping[str, Any]:
         raise error from error
+
+    @classmethod
+    def from_function(cls, func: Callable[[Any], Mapping[str, Any]]):
+        def deserialize(self, message: Any) -> Mapping[str, Any]:
+            return func(message)
+
+        constructed_type = type(
+            '__GeneratedDeserializer', (Deserializer,), {'deserialize': deserialize}
+        )
+        return constructed_type()
 
 
 @attrs(auto_attribs=True, frozen=True)

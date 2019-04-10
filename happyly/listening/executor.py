@@ -1,8 +1,7 @@
 import logging
 from collections import namedtuple
+from types import FunctionType
 from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple, Union, Callable
-
-from attr import attrs
 
 from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
@@ -24,7 +23,33 @@ ResultAndDeserialized = namedtuple('ResultAndDeserialized', 'result deserialized
 HandlerClsOrFn = Union[Handler, Callable[[Mapping[str, Any]], _Result]]
 
 
-@attrs(auto_attribs=True)
+def _deser_converter(deserializer: Union[Deserializer, Callable]):
+    if isinstance(deserializer, FunctionType):
+        return Deserializer.from_function(deserializer)
+    elif isinstance(deserializer, Deserializer):
+        return deserializer
+    else:
+        raise TypeError
+
+
+def _publ_converter(publisher: Union[BasePublisher, Callable]):
+    if isinstance(publisher, FunctionType):
+        return BasePublisher.from_function(publisher)
+    elif isinstance(publisher, BasePublisher):
+        return publisher
+    else:
+        raise TypeError
+
+
+def _ser_converter(serializer: Union[Serializer, Callable]):
+    if isinstance(serializer, FunctionType):
+        return Serializer.from_function(serializer)
+    elif isinstance(serializer, Serializer):
+        return serializer
+    else:
+        raise TypeError
+
+
 class Executor(Generic[D, P, SE]):
     """
     Component which is able to run handler as a part of more complex pipeline.
@@ -42,12 +67,12 @@ class Executor(Generic[D, P, SE]):
     depending on concrete components provided to executor's constructor.
     """
 
-    handler: HandlerClsOrFn = DUMMY_HANDLER
+    handler: HandlerClsOrFn
     """
     Provides implementation of handling stage to Executor.
     """
 
-    deserializer: D = DUMMY_SERDE  # type: ignore
+    deserializer: D
     # Why type:ignore? Because DUMMY_SERDE is a subclass of Deserializer
     # but not necessarily subclass of whatever D will be in runtime.
     """
@@ -56,14 +81,37 @@ class Executor(Generic[D, P, SE]):
     If not present, no deserialization is performed.
     """
 
-    publisher: Optional[P] = None
+    publisher: Optional[P]
     """
     Provides implementation of serialization and publishing stages to Executor.
 
     If not present, no publishing is performed.
     """
 
-    serializer: SE = DUMMY_SERDE  # type: ignore
+    serializer: SE
+
+    def __init__(
+        self,
+        handler: HandlerClsOrFn = DUMMY_HANDLER,
+        deserializer: Optional[Union[D, Callable]] = None,
+        publisher: Optional[Union[P, Callable]] = None,
+        serializer: Optional[Union[SE, Callable]] = None,
+    ):
+        self.handler = handler  # type: ignore
+        if deserializer is None:
+            self.deserializer = DUMMY_SERDE  # type: ignore
+        else:
+            self.deserializer = _deser_converter(deserializer)
+
+        if publisher is None:
+            self.publisher = None
+        else:
+            self.publisher = _publ_converter(publisher)
+
+        if serializer is None:
+            self.serializer = DUMMY_SERDE  # type: ignore
+        else:
+            self.serializer = _ser_converter(serializer)
 
     def on_received(self, original_message: Any):
         """
@@ -298,7 +346,7 @@ class Executor(Generic[D, P, SE]):
 
     def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
         try:
-            result = self.handler(deserialized)
+            result = self.handler(deserialized)  # type: ignore
         except Exception as e:
             self.on_handling_failed(
                 original_message=message, deserialized_message=deserialized, error=e
