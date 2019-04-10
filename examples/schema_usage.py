@@ -4,7 +4,7 @@ from marshmallow import fields
 
 import happyly
 from happyly import Executor
-from serialization.json import JSONDeserializerForSchema
+from happyly.serialization.json import JSONDeserializerForSchema
 
 logging.basicConfig(level=logging.INFO)
 

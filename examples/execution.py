@@ -33,3 +33,8 @@ if __name__ == '__main__':
     print('-' * 10)
     time.sleep(1)
     executor.run({'incorrect': 'oops'})
+
+    publishing_executor = Executor(
+        handler=lambda x: {'a': 2 * x['a']}, publisher=lambda x: print(x)
+    )
+    publishing_executor.run({'a': 4})
