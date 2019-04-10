@@ -12,3 +12,9 @@ formats: all
 
 python:
   version: 3.7
+  install:
+    # pip will handle our pyproject.toml
+    - method: pip
+      path: .
+      extra_requirements:
+        - doc
