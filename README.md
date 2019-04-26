@@ -1,6 +1,7 @@
 [![Happyly on PyPI](https://img.shields.io/pypi/v/happyly.svg)](https://pypi.python.org/pypi/happyly)
 [![Python version](https://img.shields.io/pypi/pyversions/happyly.svg)](https://pypi.python.org/pypi/happyly)
 [![Build Status](https://travis-ci.com/equeumco/happyly.svg?branch=master)](https://travis-ci.com/equeumco/happyly)
+[![Documentation Status](https://readthedocs.org/projects/happyly/badge/?version=latest)](https://happyly.readthedocs.io/en/latest/?badge=latest)
 
 # Description
 Happyly helps to abstract your business logic from messaging stuff,
