@@ -8,4 +8,5 @@
 # WARNING: this will use "obsolete" requirements!
 # I.e. it will use requirements from already-deployed version,
 # rather than from currently-building version.
+--pre
 happyly[doc]>=0.7
