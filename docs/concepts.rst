@@ -74,3 +74,82 @@ Executor
 
 To plug a handler into your application you will need :meth:`happyly.Executor`
 (or one of its subclasses).
+
+Executor brings the handler into a context of more pipeline steps:
+
+.. image:: images/run.png
+   :width: 600
+
+So a typical construction of an Executor looks like this:
+
+.. code-block:: python
+
+  my_executor = Executor(
+    deserializer=...
+    handler=...
+    serializer=...
+    publisher=...
+  )
+
+Executor implements two crucial methods: :code:`run()`
+and :code:`run_for_result()`.
+:code:`run(message)` starts an execution pipeline for the provided message.
+:code:`run()` returns nothing but can optionally publish a serialized result of
+handling.
+If you'd like to deal with the result by yourself, use :code:`run_for_result()`
+which returns a serialized result of handling.
+
+Executor manages all the stages of the pipeline,
+including situation when some stage fails.
+But the implementation of any stage itself (deserialization, handling,
+serialization, publishing) is provided to a constructor
+during executor instantiation.
+
+Let's take a deeper look at these stages.
+
+Deserializer
+------------
+
+The simplest deserializer is a function which
+takes a received message and returns a dict of attributes.
+
+Here is an imaginary example:
+
+.. code-block:: python
+
+    def get_attributes_from_my_message(message):
+        data = message.get_bytes().decode('utf-8')
+        return json.loads(data)
+
+You'll need a different deserializer for different
+message transport technologies or serialization formats.
+
+The same deserializer can be written as a class:
+
+.. code-block:: python
+
+    class MyDeserializer(happyly.Deserializer):
+        def deserialize(self, message):
+            data = message.get_bytes().decode('utf-8')
+            return json.loads(data)
+
+A class-based deserializer can implement a fallback method
+that constructs an error result:
+
+.. code-block:: python
+
+    class MyDeserializer(happyly.Deserializer):
+        def deserialize(self, message):
+            data = message.get_bytes().decode('utf-8')
+            return json.loads(data)
+
+        def build_error_result(self, message, error):
+            return {'status': 'failed', 'error': repr(error)}
+
+Not that if deserialization fails, then handling is skipped
+and the return value of :code:`build_error_result` is used
+as a result of handling.
+
+Class-based deserializer are also useful for parametrization,
+e.g. with message schemas.
+
