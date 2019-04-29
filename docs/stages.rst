@@ -120,6 +120,3 @@ Here's how one of the Happyly's components is implemented:
             self.project = project
             self.to_topic = to_topic
             self._publisher_client = pubsub_v1.PublisherClient()
-
-
-

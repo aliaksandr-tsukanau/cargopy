@@ -1,5 +1,5 @@
-Concepts
-========
+Key Concepts
+============
 
 
 Handler
@@ -77,8 +77,10 @@ To plug a handler into your application you will need :meth:`happyly.Executor`
 
 Executor brings the handler into a context of more pipeline steps:
 
-.. image:: images/run.png
-   :width: 300
+* deserialization
+* handling itself
+* serialization (optional)
+* publishing (optional)
 
 So a typical construction of an Executor looks like this:
 
@@ -96,8 +98,15 @@ and :code:`run_for_result()`.
 :code:`run(message)` starts an execution pipeline for the provided message.
 :code:`run()` returns nothing but can optionally publish a serialized result of
 handling.
+
+.. image:: images/run.png
+   :width: 300
+
 If you'd like to deal with the result by yourself, use :code:`run_for_result()`
 which returns a serialized result of handling.
+
+.. image:: images/run_for_result.png
+   :width: 300
 
 Executor manages all the stages of the pipeline,
 including situation when some stage fails.
@@ -107,3 +116,16 @@ during executor instantiation.
 
 You can use pre-made implementation of stages provided by Happyly
 or create you own (see :ref:`stages_section`)
+
+To customize what happens between the stages use :ref:`callbacks_section`.
+
+Listener
+--------
+
+Probably you don't want to invoke :code:`run()` each time.
+You can bind an executor to some event by creating a :meth:`BaseListener`.
+:code:`BaseListener` is a subsclass of :code:`Executor` which is all the same
+but has two additions:
+
+* the constructor requires one more parameter - subscriber;
+* one more method added - :meth:`BaseListener.start_listening()`.

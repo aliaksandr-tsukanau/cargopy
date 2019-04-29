@@ -123,6 +123,10 @@ Easy! Here's how Happyly can help.
 .. code-block:: python
 
     happyly.Listener(
+        subscriber=happyly.google_pubsub.GooglePubSubSubscriber(
+            project='my_project',
+            subscription_name='my_subscription',
+        ),
         handler=ProcessThings(),
         deserializer=happyly.google_pubsub.JSONDeserializerWithRequestIdRequired(
             schema=MyInputSchema()
