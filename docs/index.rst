@@ -36,7 +36,8 @@ Happyly also provides first-class support of Google Pub/Sub.
    usecases
    installation
    concepts
-   advanced
+   stages
+   callbacks
    apidoc
 
 
