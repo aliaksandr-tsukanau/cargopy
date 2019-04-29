@@ -13,7 +13,8 @@ Happyly can be used with Flask, Celery, Django, Kafka or whatever
 technology which is utilized for messaging.
 Happyly also provides first-class support of Google Pub/Sub.
 
-![Happyly's pipeline](docs/images/callbacks_with_failures.png "Here's how Happyly manages execution of pipeline stages")
+![Happyly's pipeline](https://github.com/equeumco/happyly/blob/master/docs/images/callbacks_with_failures.png
+ "Here's how Happyly manages execution of pipeline stages")
 
 # Why this name?
 Happyly stands for <b>HA</b>ndlers for <b>P</b>ub/sub as a <b>PY</b>thon <b>L</b>ibrar<b>Y</b>
