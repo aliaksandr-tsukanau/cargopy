@@ -27,6 +27,7 @@ their callbacks. You can customize any step by overriding any callback in a chil
     class MyExecutor(happyly.Executor):
 
         def on_received(original_message):
+            super().on_received(original_message)
             original_message.ack()
 
         def on_handling_failed(
@@ -35,8 +36,16 @@ their callbacks. You can customize any step by overriding any callback in a chil
             deserialized_message: Mapping[str, Any],
             error: Exception,
         ):
+            super().on_handling_failed(
+                original_message,
+                deserialized_message,
+                error,
+            )
             if isinstance(error, NeedToRetry):
                 original_message.nack()
+
+Always invoke base class implementation first,
+unless you are 100% sure what you are doing.
 
 The example above uses :code:`on_handling_failed` which is called whenever
 handler raises an exception.
