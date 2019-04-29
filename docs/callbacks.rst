@@ -53,7 +53,7 @@ this result is used instead of the result of handling.
 What if I need an emergency stop?
 ---------------------------------
 
-You can raise :meth:`happyly.StopPipeline` inside any callback - and the pipeline will
+You can raise :code:`happyly.StopPipeline` inside any callback - and the pipeline will
 be stopped immediately.
 Well, actually :code:`on_stopped` will be invoked then, as the last resort to finish up.
 
