@@ -12,7 +12,7 @@ pipeline which manages stages, their failures and actions between stages.
 A simplified representation of the pipeline (omitting any failures) looks like this:
 
 .. image:: images/callbacks.png
-   :width: 400
+   :width: 350
 
 Deserialization, handling, serialization and publishing are provided
 by :ref:`stages_section`.
@@ -43,7 +43,7 @@ handler raises an exception.
 Actually, here's the full picture with failures:
 
 .. image:: images/callbacks_with_failures.png
-   :width: 450
+   :width: 480
 
 Note that in case deserialization fails, handling is not conducted.
 Instead executor tries to get a fallback result via
@@ -58,7 +58,7 @@ be stopped immediately.
 Well, actually :code:`on_stopped` will be invoked then, as the last resort to finish up.
 
 .. image:: images/stop.png
-   :width: 450
+   :width: 600
 
 At the rest of the cases, i.e. if pipeline is not stopped, :code:`on_finished`
 is guaranteed to be called at the very end.
