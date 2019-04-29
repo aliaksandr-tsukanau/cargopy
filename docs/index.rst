@@ -26,8 +26,8 @@ Here's the approach of Happyly:
   Change them with different drop-in replacements at any time.
 
 Happyly can be used with Flask, Celery, Django, Kafka or whatever
-technology which can be used for messaging
-and also provides first-class support of Google Pub/Sub.
+technology which can be utilized for messaging.
+Happyly also provides first-class support of Google Pub/Sub.
 
 .. toctree::
    :maxdepth: 3
