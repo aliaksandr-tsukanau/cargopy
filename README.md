@@ -52,6 +52,10 @@ For additional components use
    and automatically deploy the package to PyPI.
    It is also advised to create a new release on GitHub
    describing significant changes since the previous version.
+   *Important:* at the time of writing, the package `bumpversion` in PyPI is unmaintained
+   and has several issues. Please use `bump2version` instead.
+   It will automatically be installed with `flit install` as a developmment dependency,
+   so no need to install it manually.
 
 # Note about versioning scheme
 We use semantic versioning with added `rc` stage:
