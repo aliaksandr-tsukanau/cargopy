@@ -122,7 +122,7 @@ Easy! Here's how Happyly can help.
 
 .. code-block:: python
 
-    happyly.Listener(
+    happyly.LateAckListener(
         subscriber=happyly.google_pubsub.GooglePubSubSubscriber(
             project='my_project',
             subscription_name='my_subscription',
