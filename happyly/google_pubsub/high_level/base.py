@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Union, Any, Mapping
 
 import marshmallow
+from happyly._deprecations.utils import will_be_removed
 
 from happyly.logs.request_id import RequestIdLogger
 from happyly.serialization import DUMMY_SERDE
@@ -162,6 +163,11 @@ class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
         handler: Handler,
         from_topic: str = '',
     ):
+        will_be_removed(
+            'GoogleBaseReceiver',
+            'Executor or its subclasses (custom or provided by Happyly)',
+            '0.11.0',
+        )
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )
