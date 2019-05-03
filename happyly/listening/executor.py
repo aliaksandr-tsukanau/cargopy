@@ -10,12 +10,14 @@ from happyly.serialization.deserializer import Deserializer
 from happyly.serialization.serializer import Serializer
 from happyly.pubsub import BasePublisher
 from happyly.serialization import DUMMY_SERDE
+from happyly.pubsub import BaseSubscriber
 
 _LOGGER = logging.getLogger(__name__)
 
 D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=BasePublisher)
 SE = TypeVar("SE", bound=Serializer)
+S = TypeVar('S', bound=BaseSubscriber)
 
 
 _Result = Optional[Mapping[str, Any]]
@@ -50,7 +52,7 @@ def _ser_converter(serializer: Union[Serializer, Callable]):
         raise TypeError
 
 
-class Executor(Generic[D, P, SE]):
+class Executor(Generic[D, P, SE, S]):
     """
     Component which is able to run handler as a part of more complex pipeline.
 
@@ -90,12 +92,15 @@ class Executor(Generic[D, P, SE]):
 
     serializer: SE
 
+    subscriber: Optional[S]
+
     def __init__(
         self,
         handler: HandlerClsOrFn = DUMMY_HANDLER,
         deserializer: Optional[Union[D, Callable]] = None,
         publisher: Optional[Union[P, Callable]] = None,
         serializer: Optional[Union[SE, Callable]] = None,
+        subscriber: Optional[S] = None,
     ):
         self.handler = handler  # type: ignore
         if deserializer is None:
@@ -112,6 +117,8 @@ class Executor(Generic[D, P, SE]):
             self.serializer = DUMMY_SERDE  # type: ignore
         else:
             self.serializer = _ser_converter(serializer)
+
+        self.subscriber = subscriber
 
     def on_received(self, original_message: Any):
         """
@@ -442,6 +449,11 @@ class Executor(Generic[D, P, SE]):
         else:
             self.on_finished(original_message=message, error=None)
             return serialized
+
+    def start_listening(self):
+        if self.subscriber is None:
+            raise Exception('Cannot subscribe since subscriber is not initialized.')
+        return self.subscriber.subscribe(callback=self.run)
 
 
 if __name__ == '__main__':

@@ -191,6 +191,11 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
         project: str,
         from_topic: str = '',
     ):
+        will_be_removed(
+            'GoogleBaseReceiveAndReply',
+            'Executor or its subclasses (custom or provided by Happyly)',
+            '0.11.0',
+        )
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )

@@ -1,4 +1,5 @@
 import marshmallow
+from happyly._deprecations.utils import will_be_removed
 
 from .early_ack import GoogleEarlyAckReceiveAndReply, GoogleEarlyAckReceiver
 from happyly.caching.cacher import Cacher
@@ -18,6 +19,11 @@ class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleEarlyAckReceiveAn
         project: str,
         cacher: Cacher,
     ):
+        will_be_removed(
+            'GoogleCachedReceiveAndReply',
+            'Executor or its subclasses (custom or provided by Happyly)',
+            '0.11.0',
+        )
         GoogleEarlyAckReceiveAndReply.__init__(
             self,
             handler=handler,
@@ -41,6 +47,11 @@ class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleEarlyAckReceiver):
         project: str,
         cacher: Cacher,
     ):
+        will_be_removed(
+            'GoogleCachedReceiver',
+            'Executor or its subclasses (custom or provided by Happyly)',
+            '0.11.0',
+        )
         GoogleEarlyAckReceiver.__init__(
             self,
             handler=handler,
