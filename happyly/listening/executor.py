@@ -379,7 +379,7 @@ class Executor(Generic[D, P, SE, S]):
 
     def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
         try:
-            if inspect.isgeneratorfunction(self.handler.handle):  # type: ignore
+            if inspect.isgeneratorfunction(self.handler):  # type: ignore
                 for result in self.handler(deserialized):  # type: ignore
                     self.on_handled(  # type: ignore
                         original_message=message,
