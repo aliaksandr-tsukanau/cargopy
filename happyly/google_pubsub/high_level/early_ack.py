@@ -10,7 +10,7 @@ class GoogleEarlyAckReceiver(GoogleBaseReceiver):
         super().__init__(*args, **kwargs)
         will_be_removed(
             'GoogleEarlyAckReceiver',
-            'Executor or its subclasses (custom or provided by Happyly)',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             '0.11.0',
         )
 
@@ -24,7 +24,7 @@ class GoogleEarlyAckReceiveAndReply(GoogleBaseReceiveAndReply):
         super().__init__(*args, **kwargs)
         will_be_removed(
             'GoogleEarlyAckReceiveAndReply',
-            'Executor or its subclasses (custom or provided by Happyly)',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             '0.11.0',
         )
 
