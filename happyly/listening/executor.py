@@ -474,7 +474,15 @@ class Executor(Generic[D, P, SE, S]):
 
     def run_for_result(self, message: Optional[Any] = None):
         try:
-            _, _, serialized = next(self._run_core(message))
+            if generator_check.is_generator(self.handler):  # type: ignore
+
+                def func(m):
+                    for _, _, res in self._run_core(m):
+                        yield res
+
+                result = func(message)
+            else:
+                _, _, result = next(self._run_core(message))
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
             raise FetchedNoResult from e
@@ -483,7 +491,7 @@ class Executor(Generic[D, P, SE, S]):
             raise FetchedNoResult from e
         else:
             self.on_finished(original_message=message, error=None)
-            return serialized
+            return result
 
     def start_listening(self):
         if self.subscriber is None:
@@ -492,6 +500,10 @@ class Executor(Generic[D, P, SE, S]):
 
 
 if __name__ == '__main__':
+
+    def a(m):
+        for i in range(3):
+            yield {"a": str(i)}
 
     class StoppingExecutor(Executor):
         def on_deserialized(
@@ -503,4 +515,9 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     StoppingExecutor(lambda m: {'2': 42}).run()  # type: ignore
-    print(Executor(lambda m: {"spam": "eggs"}).run_for_result())
+    import time
+
+    time.sleep(1)
+    res = Executor(a).run_for_result()
+    for r in res:
+        print(r)
