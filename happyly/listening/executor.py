@@ -4,7 +4,17 @@ import threading
 import queue
 from collections import namedtuple
 from types import FunctionType
-from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple, Union, Callable
+from typing import (
+    Mapping,
+    Any,
+    Optional,
+    TypeVar,
+    Generic,
+    Tuple,
+    Union,
+    Callable,
+    Iterator,
+)
 
 from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
@@ -332,7 +342,7 @@ class Executor(Generic[D, P, SE, S]):
 
     def _fetch_deserialized_and_result(
         self, message: Optional[Any]
-    ) -> ResultAndDeserialized:
+    ) -> Iterator[ResultAndDeserialized]:
         try:
             deserialized = self._deserialize(message)
         except StopPipeline as e:
@@ -369,9 +379,9 @@ class Executor(Generic[D, P, SE, S]):
 
     def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
         try:
-            if inspect.isgeneratorfunction(self.handler.handle):
+            if inspect.isgeneratorfunction(self.handler.handle):  # type: ignore
                 for result in self.handler(deserialized):  # type: ignore
-                    self.on_handled(
+                    self.on_handled(  # type: ignore
                         original_message=message,
                         deserialized_message=deserialized,
                         result=result,
@@ -419,7 +429,7 @@ class Executor(Generic[D, P, SE, S]):
 
     def _run_core(
         self, message: Optional[Any] = None
-    ) -> Tuple[Optional[Mapping[str, Any]], _Result, Optional[Any]]:
+    ) -> Iterator[Tuple[Optional[Mapping[str, Any]], _Result, Optional[Any]]]:
 
         self.on_received(message)
         for result, deserialized in self._fetch_deserialized_and_result(message):

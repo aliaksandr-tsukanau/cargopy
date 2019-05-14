@@ -11,7 +11,7 @@ from ..subscribers import GooglePubSubSubscriber
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
 from happyly import Handler, Serializer
-from happyly.listening.listener import ListenerWithAck
+from happyly.listening.listener import ExecutorWithAck
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,8 +21,8 @@ def _format_message(message):
     return f'data: {message.data}, attributes: {message.attributes}'
 
 
-class _BaseGoogleListenerWithRequestIdLogger(
-    ListenerWithAck[
+class GooglePubSubExecutorWithRequestId(
+    ExecutorWithAck[
         JSONDeserializerWithRequestIdRequired,
         Union[None, GooglePubSubPublisher],
         Serializer,
@@ -154,6 +154,16 @@ class _BaseGoogleListenerWithRequestIdLogger(
         logger.info(f'Stopped pipeline{s}')
 
 
+class _BaseGoogleListenerWithRequestIdLogger(GooglePubSubExecutorWithRequestId):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        will_be_removed(
+            '_BaseGoogleListenerWithRequestIdLogger',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
+            '0.11.0',
+        )
+
+
 class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
     def __init__(
         self,
@@ -165,7 +175,7 @@ class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
     ):
         will_be_removed(
             'GoogleBaseReceiver',
-            'Executor or its subclasses (custom or provided by Happyly)',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             '0.11.0',
         )
         subscriber = GooglePubSubSubscriber(
@@ -193,7 +203,7 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
     ):
         will_be_removed(
             'GoogleBaseReceiveAndReply',
-            'Executor or its subclasses (custom or provided by Happyly)',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             '0.11.0',
         )
         subscriber = GooglePubSubSubscriber(

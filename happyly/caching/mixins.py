@@ -1,4 +1,5 @@
 import json
+import warnings
 from typing import Any, Mapping, Optional
 
 from happyly.caching.cacher import Cacher
@@ -19,6 +20,10 @@ class CacheByRequestIdMixin:
     """
 
     def __init__(self, cacher: Cacher):
+        warnings.warn(
+            'CacheByRequestIdMixin will be removed in happyly v0.11.0',
+            DeprecationWarning,
+        )
         self.cacher = cacher
 
     def on_received(self, message: Any):

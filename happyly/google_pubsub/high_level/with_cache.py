@@ -21,7 +21,7 @@ class GoogleCachedReceiveAndReply(CacheByRequestIdMixin, GoogleEarlyAckReceiveAn
     ):
         will_be_removed(
             'GoogleCachedReceiveAndReply',
-            'Executor or its subclasses (custom or provided by Happyly)',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             '0.11.0',
         )
         GoogleEarlyAckReceiveAndReply.__init__(
@@ -49,7 +49,7 @@ class GoogleCachedReceiver(CacheByRequestIdMixin, GoogleEarlyAckReceiver):
     ):
         will_be_removed(
             'GoogleCachedReceiver',
-            'Executor or its subclasses (custom or provided by Happyly)',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             '0.11.0',
         )
         GoogleEarlyAckReceiver.__init__(

@@ -29,8 +29,7 @@ class GoogleSimpleSender(
     ):
         will_be_removed(
             deprecated_name='GoogleSimpleSender',
-            use_instead='GooglePubSubPublisher;'
-            'or Executor or its subclasses (custom or provided by Happyly)',
+            use_instead='ExecutorWithAck or GooglePubSubExecutorWithRequestId',
             removing_in_version='0.11.0',
         )
         if input_schema is None:
