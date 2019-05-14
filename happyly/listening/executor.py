@@ -1,5 +1,4 @@
 import logging
-import inspect
 import threading
 import queue
 from collections import namedtuple
@@ -16,6 +15,7 @@ from typing import (
     Iterator,
 )
 
+from happyly.utils import generator_check
 from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
 from happyly.handling import Handler
@@ -379,7 +379,7 @@ class Executor(Generic[D, P, SE, S]):
 
     def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
         try:
-            if inspect.isgeneratorfunction(self.handler):  # type: ignore
+            if generator_check.is_generator(self.handler):  # type: ignore
                 for result in self.handler(deserialized):  # type: ignore
                     self.on_handled(  # type: ignore
                         original_message=message,
