@@ -3,7 +3,7 @@
 # flake8: noqa F401
 import logging
 
-__version__ = '0.9.0rc3'
+__version__ = '0.9.0'
 
 
 from .listening import Executor, BaseListener
