@@ -1,4 +1,5 @@
 import logging
+import warnings
 
 from happyly.caching.cacher import Cacher
 
@@ -7,6 +8,10 @@ _LOGGER = logging.getLogger(__name__)
 
 class RedisCacher(Cacher):
     def __init__(self, host: str, port: int, prefix: str = ''):
+        warnings.warn(
+            'RedisCacher will be removed in happyly v0.11.0', DeprecationWarning
+        )
+
         try:
             import redis
         except ImportError as e:

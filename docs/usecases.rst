@@ -78,14 +78,14 @@ Easy! Here's how Happyly can help.
             else:
                 result = 'not allowed'
             return {
-                'request_id': req_id
-                'result': result
+                'request_id': req_id,
+                'result': result,
             }
         except Exception as error:
             return {
-                'request_id': message['request_id']
+                'request_id': message['request_id'],
                 'result': 'error',
-                'error': str(error)
+                'error': str(error),
             }
 
 3. Plug it into Flask:

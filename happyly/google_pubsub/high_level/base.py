@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Union, Any, Mapping
 
 import marshmallow
+from happyly._deprecations.utils import will_be_removed
 
 from happyly.logs.request_id import RequestIdLogger
 from happyly.serialization import DUMMY_SERDE
@@ -10,7 +11,7 @@ from ..subscribers import GooglePubSubSubscriber
 from ..deserializers import JSONDeserializerWithRequestIdRequired
 from ..publishers import GooglePubSubPublisher
 from happyly import Handler, Serializer
-from happyly.listening.listener import ListenerWithAck
+from happyly.listening.listener import ExecutorWithAck
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -20,8 +21,8 @@ def _format_message(message):
     return f'data: {message.data}, attributes: {message.attributes}'
 
 
-class _BaseGoogleListenerWithRequestIdLogger(
-    ListenerWithAck[
+class GooglePubSubExecutorWithRequestId(
+    ExecutorWithAck[
         JSONDeserializerWithRequestIdRequired,
         Union[None, GooglePubSubPublisher],
         Serializer,
@@ -153,6 +154,16 @@ class _BaseGoogleListenerWithRequestIdLogger(
         logger.info(f'Stopped pipeline{s}')
 
 
+class _BaseGoogleListenerWithRequestIdLogger(GooglePubSubExecutorWithRequestId):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        will_be_removed(
+            '_BaseGoogleListenerWithRequestIdLogger',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
+            '0.11.0',
+        )
+
+
 class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
     def __init__(
         self,
@@ -162,6 +173,11 @@ class GoogleBaseReceiver(_BaseGoogleListenerWithRequestIdLogger):
         handler: Handler,
         from_topic: str = '',
     ):
+        will_be_removed(
+            'GoogleBaseReceiver',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
+            '0.11.0',
+        )
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )
@@ -185,6 +201,11 @@ class GoogleBaseReceiveAndReply(_BaseGoogleListenerWithRequestIdLogger):
         project: str,
         from_topic: str = '',
     ):
+        will_be_removed(
+            'GoogleBaseReceiveAndReply',
+            'ExecutorWithAck or GooglePubSubExecutorWithRequestId',
+            '0.11.0',
+        )
         subscriber = GooglePubSubSubscriber(
             project=project, subscription_name=from_subscription
         )

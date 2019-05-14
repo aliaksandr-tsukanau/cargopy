@@ -1,7 +1,5 @@
 from typing import Any
 
-from google.cloud import pubsub_v1
-
 from happyly.pubsub import BasePublisher
 
 
@@ -17,6 +15,13 @@ class GooglePubSubPublisher(BasePublisher):
             raise e
 
     def __init__(self, project: str, to_topic: str):
+        try:
+            from google.cloud import pubsub_v1
+        except ImportError:
+            raise ImportError(
+                'Please install google-cloud-pubsub to use this component'
+            )
+
         super().__init__()
         self.project = project
         self.to_topic = to_topic

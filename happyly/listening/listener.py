@@ -25,53 +25,10 @@ S = TypeVar("S", bound=BaseSubscriber)
 SE = TypeVar("SE", bound=Serializer)
 
 
-class BaseListener(Executor[D, P, SE], Generic[D, P, SE, S]):
-    """
-    Listener is a form of Executor
-    which is able to run pipeline by an event coming from a subscription.
-
-    Listener itself doesn't know how to subscribe,
-    it subscribes via a provided subscriber.
-
-    As any executor, implements managing of stages inside the pipeline
-    (deserialization, handling, serialization, publishing)
-    and contains callbacks between the stages which can be easily overridden.
-
-    As any executor, listener does not implement stages themselves,
-    it takes internal implementation of stages from corresponding components:
-    handler, deserializer, publisher.
-
-    It means that listener is universal
-    and can work with any serialization/messaging technology
-    depending on concrete components provided to listener's constructor.
-    """
-
-    subscriber: S
-    """
-    Provides implementation of how to subscribe.
-    """
-
-    def __init__(  # type: ignore
-        self,
-        subscriber: S,
-        handler: Handler,
-        deserializer: D,
-        serializer: SE = DUMMY_SERDE,  # type: ignore
-        publisher: Optional[P] = None,
-    ):
-        super().__init__(
-            handler=handler,
-            deserializer=deserializer,
-            publisher=publisher,
-            serializer=serializer,
-        )
-        self.subscriber = subscriber
-
-    def start_listening(self):
-        return self.subscriber.subscribe(callback=self.run)
+BaseListener = Executor
 
 
-class ListenerWithAck(BaseListener[D, P, SE, SubscriberWithAck], Generic[D, P, SE]):
+class ExecutorWithAck(Executor[D, P, SE, SubscriberWithAck], Generic[D, P, SE]):
     """
     Acknowledge-aware listener.
     Defines :meth:`ListenerWithAck.ack` method.
@@ -115,11 +72,13 @@ class ListenerWithAck(BaseListener[D, P, SE, SubscriberWithAck], Generic[D, P, S
         :param message:
             Message as it has been received, without any deserialization
         """
+        if self.subscriber is None:
+            raise Exception('Cannot ack since subscriber is not initialized.')
         self.subscriber.ack(message)
         self.on_acknowledged(message)
 
 
-class EarlyAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
+class EarlyAckExecutor(ExecutorWithAck[D, P, SE], Generic[D, P, SE]):
     """
     Acknowledge-aware :class:`BaseListener`,
     which performs :meth:`.ack` right after
@@ -131,7 +90,7 @@ class EarlyAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
         super()._fetch_deserialized_and_result(message)
 
 
-class LateAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
+class LateAckExecutor(ExecutorWithAck[D, P, SE], Generic[D, P, SE]):
     """
     Acknowledge-aware listener,
     which performs :meth:`.ack` at the very end of pipeline.
@@ -140,3 +99,8 @@ class LateAckListener(ListenerWithAck[D, P, SE], Generic[D, P, SE]):
     def on_finished(self, original_message: Any, error: Optional[Exception]):
         self.ack(original_message)
         super().on_finished(original_message, error)
+
+
+ListenerWithAck = ExecutorWithAck
+EarlyAckListener = EarlyAckExecutor
+LateAckListener = LateAckExecutor

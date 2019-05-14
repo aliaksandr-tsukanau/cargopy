@@ -1,23 +1,24 @@
 import logging
 from typing import Callable, Any
 
-from attr import attrs, attrib
-from google.cloud import pubsub_v1
-
 from happyly.pubsub import SubscriberWithAck
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-@attrs(auto_attribs=True)
 class GooglePubSubSubscriber(SubscriberWithAck):
-    project: str
-    subscription_name: str
-    _subscription_client: pubsub_v1.SubscriberClient = attrib(init=False)
-    _subscription_path: str = attrib(init=False)
+    def __init__(self, project: str, subscription_name: str):
+        try:
+            from google.cloud import pubsub_v1
+        except ImportError:
+            raise ImportError(
+                'Please install google-cloud-pubsub to use this component'
+            )
 
-    def __attrs_post_init__(self):
+        super().__init__()
+        self.project = project
+        self.subscription_name = subscription_name
         s = pubsub_v1.SubscriberClient()
         self._subscription_path = s.subscription_path(
             self.project, self.subscription_name

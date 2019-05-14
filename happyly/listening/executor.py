@@ -1,7 +1,20 @@
 import logging
+import inspect
+import threading
+import queue
 from collections import namedtuple
 from types import FunctionType
-from typing import Mapping, Any, Optional, TypeVar, Generic, Tuple, Union, Callable
+from typing import (
+    Mapping,
+    Any,
+    Optional,
+    TypeVar,
+    Generic,
+    Tuple,
+    Union,
+    Callable,
+    Iterator,
+)
 
 from happyly.exceptions import StopPipeline, FetchedNoResult
 from happyly.handling.dummy_handler import DUMMY_HANDLER
@@ -10,12 +23,14 @@ from happyly.serialization.deserializer import Deserializer
 from happyly.serialization.serializer import Serializer
 from happyly.pubsub import BasePublisher
 from happyly.serialization import DUMMY_SERDE
+from happyly.pubsub import BaseSubscriber
 
 _LOGGER = logging.getLogger(__name__)
 
 D = TypeVar("D", bound=Deserializer)
 P = TypeVar("P", bound=BasePublisher)
 SE = TypeVar("SE", bound=Serializer)
+S = TypeVar('S', bound=BaseSubscriber)
 
 
 _Result = Optional[Mapping[str, Any]]
@@ -50,7 +65,7 @@ def _ser_converter(serializer: Union[Serializer, Callable]):
         raise TypeError
 
 
-class Executor(Generic[D, P, SE]):
+class Executor(Generic[D, P, SE, S]):
     """
     Component which is able to run handler as a part of more complex pipeline.
 
@@ -90,12 +105,15 @@ class Executor(Generic[D, P, SE]):
 
     serializer: SE
 
+    subscriber: Optional[S]
+
     def __init__(
         self,
         handler: HandlerClsOrFn = DUMMY_HANDLER,
         deserializer: Optional[Union[D, Callable]] = None,
         publisher: Optional[Union[P, Callable]] = None,
         serializer: Optional[Union[SE, Callable]] = None,
+        subscriber: Optional[S] = None,
     ):
         self.handler = handler  # type: ignore
         if deserializer is None:
@@ -112,6 +130,9 @@ class Executor(Generic[D, P, SE]):
             self.serializer = DUMMY_SERDE  # type: ignore
         else:
             self.serializer = _ser_converter(serializer)
+
+        self.subscriber = subscriber
+        self.publisher_queue: queue.Queue = queue.Queue()
 
     def on_received(self, original_message: Any):
         """
@@ -290,12 +311,13 @@ class Executor(Generic[D, P, SE]):
         _LOGGER.info(f'Stopped pipeline{s}')
 
     def _try_publish(
-        self,
-        original: Any,
-        parsed: Optional[Mapping[str, Any]],
-        result: _Result,
-        serialized: Any,
+        self
+        # original: Any,
+        # parsed: Optional[Mapping[str, Any]],
+        # result: _Result,
+        # serialized: Any,
     ):
+        original, parsed, result, serialized = self.publisher_queue.get()
         assert self.publisher is not None
         try:
             self.publisher.publish(serialized)
@@ -307,6 +329,7 @@ class Executor(Generic[D, P, SE]):
                 serialized_message=serialized,
                 error=e,
             )
+            self.publisher_queue.task_done()
             raise e from e
         else:
             self.on_published(
@@ -315,23 +338,23 @@ class Executor(Generic[D, P, SE]):
                 result=result,
                 serialized_message=serialized,
             )
+            self.publisher_queue.task_done()
 
     def _fetch_deserialized_and_result(
         self, message: Optional[Any]
-    ) -> ResultAndDeserialized:
+    ) -> Iterator[ResultAndDeserialized]:
         try:
             deserialized = self._deserialize(message)
         except StopPipeline as e:
             raise e from e
         except Exception as e:
-            retval = ResultAndDeserialized(
+            yield ResultAndDeserialized(
                 result=self._build_error_result(message, e), deserialized=None
             )
-            return retval
-        retval = ResultAndDeserialized(
-            result=self._handle(message, deserialized), deserialized=deserialized
-        )
-        return retval
+            return
+
+        for result in self._handle(message, deserialized):
+            yield ResultAndDeserialized(result=result, deserialized=deserialized)
 
     def _deserialize(self, message: Optional[Any]):
         try:
@@ -356,16 +379,28 @@ class Executor(Generic[D, P, SE]):
 
     def _handle(self, message: Optional[Any], deserialized: Mapping[str, Any]):
         try:
-            result = self.handler(deserialized)  # type: ignore
+            if inspect.isgeneratorfunction(self.handler.handle):  # type: ignore
+                for result in self.handler(deserialized):  # type: ignore
+                    self.on_handled(  # type: ignore
+                        original_message=message,
+                        deserialized_message=deserialized,
+                        result=result,
+                    )
+                    yield result
+            else:
+                result = self.handler(deserialized)  # type: ignore
+                self.on_handled(
+                    original_message=message,
+                    deserialized_message=deserialized,
+                    result=result,
+                )
+                yield result
+                return
         except Exception as e:
             self.on_handling_failed(
                 original_message=message, deserialized_message=deserialized, error=e
             )
             raise e from e
-        self.on_handled(
-            original_message=message, deserialized_message=deserialized, result=result
-        )
-        return result
 
     def _serialize(
         self,
@@ -394,15 +429,15 @@ class Executor(Generic[D, P, SE]):
 
     def _run_core(
         self, message: Optional[Any] = None
-    ) -> Tuple[Optional[Mapping[str, Any]], _Result, Optional[Any]]:
+    ) -> Iterator[Tuple[Optional[Mapping[str, Any]], _Result, Optional[Any]]]:
 
         self.on_received(message)
-        result, deserialized = self._fetch_deserialized_and_result(message)
-        if result is not None:
-            serialized = self._serialize(message, deserialized, result)
-        else:
-            serialized = None
-        return deserialized, result, serialized
+        for result, deserialized in self._fetch_deserialized_and_result(message):
+            if result is not None:
+                serialized = self._serialize(message, deserialized, result)
+            else:
+                serialized = None
+            yield deserialized, result, serialized
 
     def run(self, message: Optional[Any] = None):
         """
@@ -417,12 +452,19 @@ class Executor(Generic[D, P, SE]):
             (useful to quickly publish message attributes by hand)
         """
         try:
-            deserialized, result, serialized = self._run_core(message)
-            if self.publisher is not None and serialized is not None:
-                assert result is not None
-                # something is serialized, so there must be a result
+            publisher_thread = threading.Thread(target=self._try_publish, daemon=True)
+            publisher_thread.start()
 
-                self._try_publish(message, deserialized, result, serialized)
+            for deserialized, result, serialized in self._run_core(message):
+                if self.publisher is not None and serialized is not None:
+                    assert (
+                        result is not None
+                    )  # something is serialized, so there must be a result
+                    self.publisher_queue.put(
+                        (message, deserialized, result, serialized)
+                    )
+
+            self.publisher_queue.join()
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
         except Exception as e:
@@ -432,7 +474,7 @@ class Executor(Generic[D, P, SE]):
 
     def run_for_result(self, message: Optional[Any] = None):
         try:
-            _, _, serialized = self._run_core(message)
+            _, _, serialized = next(self._run_core(message))
         except StopPipeline as e:
             self.on_stopped(original_message=message, reason=e.reason)
             raise FetchedNoResult from e
@@ -442,6 +484,11 @@ class Executor(Generic[D, P, SE]):
         else:
             self.on_finished(original_message=message, error=None)
             return serialized
+
+    def start_listening(self):
+        if self.subscriber is None:
+            raise Exception('Cannot subscribe since subscriber is not initialized.')
+        return self.subscriber.subscribe(callback=self.run)
 
 
 if __name__ == '__main__':
