@@ -29,7 +29,7 @@ class GooglePubSubExecutorWithRequestId(
     ]
 ):
     """
-    Introduces advanced logging based on topic and request id.
+    ExecutorWithAck subtype which adds advanced logging based on topic and request id.
     """
 
     def __init__(

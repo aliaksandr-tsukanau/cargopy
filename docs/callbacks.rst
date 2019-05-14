@@ -6,7 +6,7 @@ Callbacks
 Overview
 --------
 
-:code:`Executor` (as well as :code:`BaseListener`) provides a rich
+:code:`Executor` provides a rich
 pipeline which manages stages, their failures and actions between stages.
 
 A simplified representation of the pipeline (omitting any failures) looks like this:

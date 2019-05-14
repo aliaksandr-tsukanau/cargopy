@@ -27,6 +27,8 @@ transition between messaging and serialization technologies.
 ```pip install happyly```
 
 For additional components use
+ ```pip install happyly[google-cloud-pubsub]```
+ or
  ```pip install happyly[flask]```
  or
  ```pip install happyly[redis]```

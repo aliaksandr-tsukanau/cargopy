@@ -119,13 +119,8 @@ or create you own (see :ref:`stages_section`)
 
 To customize what happens between the stages use :ref:`callbacks_section`.
 
-Listener
---------
-
 Probably you don't want to invoke :code:`run()` each time.
-You can bind an executor to some event by creating a :meth:`BaseListener`.
-:code:`BaseListener` is a subsclass of :code:`Executor` which is all the same
-but has two additions:
+You can bind an executor to some event by passing a subscriber
+to :meth:`Executor`'s constructor.
 
-* the constructor requires one more parameter - subscriber;
-* one more method added - :meth:`BaseListener.start_listening()`.
+There used to be a special component - Listener - for that, but it is deprecated now.
