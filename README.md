@@ -1,9 +1,10 @@
-[![Happyly on PyPI](https://img.shields.io/pypi/v/happyly.svg)](https://pypi.python.org/pypi/happyly)
-[![Python version](https://img.shields.io/pypi/pyversions/happyly.svg)](https://pypi.python.org/pypi/happyly)
-[![Build Status](https://travis-ci.com/equeumco/happyly.svg?branch=master)](https://travis-ci.com/equeumco/happyly)
-[![Documentation Status](https://readthedocs.org/projects/happyly/badge/?version=latest)](https://happyly.readthedocs.io/en/latest/?badge=latest)
+This is a fork of [Equeum's Happyly](https://github.com/equeumco/happyly) library,
+aimed to be an independent continuation of the original library headed by the original author.
+Version numbers will follow the ones used for Happyly so that no one is confused.
 
-# Description
+Cargopy is not yet ready, transition to the new package is in progress
+
+# Description (old)
 Happyly helps to abstract your business logic from messaging stuff,
 so that your code is maintainable and ensures separation of concerns.
 Actual actions your code perform are abstracted into universal *Handlers*
@@ -16,27 +17,10 @@ Happyly also provides first-class support of Google Pub/Sub.
 ![Happyly's pipeline](https://github.com/equeumco/happyly/blob/master/docs/images/callbacks_with_failures.png
  "Here's how Happyly manages execution of pipeline stages")
 
-# Why this name?
-Happyly stands for <b>HA</b>ndlers for <b>P</b>ub/sub as a <b>PY</b>thon <b>L</b>ibrar<b>Y</b>
-
-The lib was originally created for usage with Google Pub/Sub,
-but it then turned out that the idea is much more universal and can simplify
-transition between messaging and serialization technologies.
-
-# Installation
-```pip install happyly```
-
-For additional components use
- ```pip install happyly[google-cloud-pubsub]```
- or
- ```pip install happyly[flask]```
- or
- ```pip install happyly[redis]```
-
-# Documentation
+# Documentation (old)
 [Read the docs](https://happyly.readthedocs.io/en/latest/)
 
-# Development
+# Development (old, for Happyly, to be rewritten)
 1. Create and activate a virtual environment (e.g. `python -m venv env; source env/bin/activate`).
 2. Install [`flit`](https://flit.readthedocs.io/en/latest/): `pip install flit`.
 3. Use `flit` to install the package with all development dependencies: `flit install`.
